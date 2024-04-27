@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resource/desktopRole/summerGril/0.png</file>
+        <file>resource/desktopRole/summerGril/1.png</file>
+        <file>resource/desktopRole/summerGril/2.png</file>
+        <file>resource/desktopRole/summerGril/3.png</file>
+        <file>resource/desktopRole/summerGril/4.png</file>
+        <file>resource/desktopRole/summerGril/5.png</file>
+        <file>resource/button/cut.png</file>
+        <file>resource/button/open.png</file>
+        <file>resource/button/quit.png</file>
+        <file>resource/wallpaper/1.jpg</file>
+        <file>resource/wallpaper/2.jpg</file>
+        <file>resource/wallpaper/3.jpeg</file>
+    </qresource>
+</RCC>
