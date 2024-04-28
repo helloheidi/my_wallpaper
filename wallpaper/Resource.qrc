@@ -12,5 +12,7 @@
         <file>resource/wallpaper/1.jpg</file>
         <file>resource/wallpaper/2.jpg</file>
         <file>resource/wallpaper/3.jpeg</file>
+        <file>resource/gif/1.gif</file>
+        <file>resource/gif/2.gif</file>
     </qresource>
 </RCC>

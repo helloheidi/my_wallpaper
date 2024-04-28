@@ -93,17 +93,28 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="desktopwidget.cpp" />
+    <ClCompile Include="imageview.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="widget.cpp" />
+    <ClCompile Include="mainwidget.cpp" />
+    <ClCompile Include="rolewidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="widget.h" />
+    <QtMoc Include="rolewidget.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Resource.qrc" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="desktopwidget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="mainwidget.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="mainwidget.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="imageview.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

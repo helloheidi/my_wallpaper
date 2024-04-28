@@ -1,6 +1,7 @@
 #include "desktopwidget.h"
 #include <QHBoxLayout>
 #include <qt_windows.h>
+#include <qvector.h>
 
 DesktopWidget::DesktopWidget(QWidget *parent)
 	: QWidget(parent)
@@ -69,6 +70,6 @@ void DesktopWidget::SetPixmap(const QString& fileName)
 	}
 	bkPixmap.load(fileName);
 	bklabel->setPixmap(bkPixmap);
-	this->hide();
+	//this->hide();
 	this->showFullScreen();
 }
