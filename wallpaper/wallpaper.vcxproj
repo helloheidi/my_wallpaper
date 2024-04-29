@@ -63,6 +63,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalOptions>/UTF-8</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -93,6 +98,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="desktopwidget.cpp" />
+    <ClCompile Include="ImagePathGroup.cpp" />
     <ClCompile Include="imageview.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainwidget.cpp" />
@@ -115,6 +121,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="imageview.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ImagePathGroup.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

@@ -10,6 +10,7 @@
 MainWidget::MainWidget(QWidget *parent)
 	: QWidget(parent)
 	, ui(new Ui::MainWidgetClass)
+    , desktopWidget(new DesktopWidget())
 {
 	ui->setupUi(this);
 	ui->ImagelistWidget->setIconSize(QSize(125, 125));//设置单个Icon大小
@@ -26,50 +27,42 @@ MainWidget::MainWidget(QWidget *parent)
 
     //查找本地图片路径下的png后缀和jpg后缀的图片名  xxx.png  xxx.jpg
     files = dir.entryList(namefiles, QDir::Files | QDir::Readable, QDir::Name);
-    //for (int i = 0; i < files.size(); i++)
-    //{
-    //    qDebug() << files.at(i);
-    //    QListWidgetItem* newitem = new QListWidgetItem(QIcon(QPixmap(path + "/" + files.at(i)).scaled(125, 125)), files.at(i));
-    //    QFileInfo fi = files.at(i);
-    //    //newitem->setText(fi.baseName());//Returns the base name of the file without the path
-    //    newitem->setText("");
-    //    newitem->setTextAlignment(Qt::AlignHCenter);
-    //    ui->ImagelistWidget->addItem(newitem);
-    //}
+    ImagePaths = new ImagePathGroup(files);
     for (int i = 0; i < files.size(); ++i) {
-        QString fullPath = path + "/" + files.at(i);
+        QString imagePath = path + "/" + files.at(i);
         // 异步加载图片
         QtConcurrent::run([=]() {
             qDebug() << files.at(i);
-            QIcon icon(createRoundedPixmap(QPixmap(fullPath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
-            emit sendIcon(icon, files.at(i));
+            QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
+            QListWidgetItem* newitem = new QListWidgetItem(icon, "");
+            //newitem->setSizeHint(QSize(125, 125));
+            newitem->setData(Qt::UserRole, QVariant(imagePath));
+            newitem->setText(""); // 如果不需要显示文本
+            newitem->setTextAlignment(Qt::AlignHCenter);
+            //ui->ImagelistWidget->addItem(newitem);
+            emit sendImage(newitem);
             });
     }
 
     // 连接信号到槽，以添加图标到列表
-    connect(this, &MainWidget::sendIcon, this, &MainWidget::addIconToList, Qt::QueuedConnection);
+    connect(this, &MainWidget::sendImage, this, &MainWidget::addIconToList, Qt::QueuedConnection);
     //样式表设计
     ui->ImagelistWidget->setStyleSheet("QListWidget{background-color: white;border:none; color:black;outline:0px; }"
         "QListWidget::Item{padding-left:0px;padding-top:5px; padding-bottom:4px;color:black}"
-        //"QListWidget::Item {border: 0px; padding: 0px; border:none;border-radius:5px;}"
-        "QListWidget::Item {border:none;border-radius:10px;}"
         "QListWidget::Item:hover{background:lightgreen; color:red;}"
         "QListWidget::item:selected{background:lightgray; color:green; }"
     );
-    connect(ui->ImagelistWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(enlargeImage(QListWidgetItem*)));
-
-    QVBoxLayout* vlayout = new QVBoxLayout(this);
-    vlayout->addWidget(ui->ImagelistWidget);
-    vlayout->addWidget(ui->ImageListBnt);
-    vlayout->addWidget(ui->MyImageBnt);
-    vlayout->addWidget(ui->SettingBnt);
+    connect(ui->ImagelistWidget, &QListWidget::itemDoubleClicked, this, &MainWidget::enlargeImage);
+    connect(ui->ImagelistWidget, &QListWidget::itemClicked, this, &MainWidget::previewImage);
 }
 
-void MainWidget::addIconToList(QIcon icon, QString filename) {
-    QListWidgetItem* newitem = new QListWidgetItem(icon, filename);
-    //newitem->setSizeHint(QSize(125, 125));
-    newitem->setText(""); // 如果不需要显示文本
-    newitem->setTextAlignment(Qt::AlignHCenter);
+void MainWidget::addIconToList(QListWidgetItem* newitem) {
+    //QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
+    //QListWidgetItem* newitem = new QListWidgetItem(icon, "");
+    ////newitem->setSizeHint(QSize(125, 125));
+    //newitem->setData(Qt::UserRole, QVariant(imagePath));
+    //newitem->setText(""); // 如果不需要显示文本
+    //newitem->setTextAlignment(Qt::AlignHCenter);
     ui->ImagelistWidget->addItem(newitem);
 }
 
@@ -90,13 +83,24 @@ QPixmap MainWidget::createRoundedPixmap(const QPixmap& source, int radius) {
     return pixmap;
 }
 
-void MainWidget::enlargeImage(QListWidgetItem* item)
-{
-    QRect rect = this->geometry();//获取当前窗口坐标及大小 x、y、w、h
+void MainWidget::updateImageList() {
 
-    //通过自定义的窗口显示图片
-    ImageView* showImageWidget = new ImageView(item, QRect(rect.x(), rect.y() + rect.y() * 1 / 4, rect.width(), rect.height() * 2 / 3));
+}
+//查看图片
+void MainWidget::enlargeImage(QListWidgetItem* item) {
+    QString filepath = item->data(Qt::UserRole).toString();
+    desktopWidget->SetPixmap(filepath);
+    ImageView* showImageWidget = new ImageView();
+    showImageWidget->SetImage(filepath);
     showImageWidget->show();
+    
+}
+
+//预览图片
+void MainWidget::previewImage(QListWidgetItem* item) {
+    QString filepath = item->data(Qt::UserRole).toString();
+
+    ui->ImagePreview->setPixmap(QPixmap(filepath).scaled(ui->ImagePreview->width(), ui->ImagePreview->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 MainWidget::~MainWidget()
@@ -111,3 +115,7 @@ void MainWidget::on_ImageListBnt_clicked() {
 void MainWidget::on_MyImageBnt_clicked() {
 	ui->stackedWidget->setCurrentIndex(2);
 }
+
+//void MainWidget::on_SetDesktop_clicked() {
+//    //ui->stackedWidget->setCurrentIndex(2);
+//}

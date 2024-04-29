@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>1130</width>
+    <height>611</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,8 +18,8 @@
     <rect>
      <x>110</x>
      <y>40</y>
-     <width>461</width>
-     <height>311</height>
+     <width>740</width>
+     <height>540</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -29,10 +29,10 @@
     <widget class="QListWidget" name="ImagelistWidget">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>20</y>
-       <width>431</width>
-       <height>291</height>
+       <x>0</x>
+       <y>0</y>
+       <width>740</width>
+       <height>540</height>
       </rect>
      </property>
     </widget>
@@ -72,20 +72,69 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>80</y>
+     <y>190</y>
      <width>80</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
-    <string>PushButton</string>
+    <string>ImageList</string>
    </property>
   </widget>
   <widget class="QPushButton" name="MyImageBnt">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>170</y>
+     <x>20</x>
+     <y>310</y>
+     <width>80</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MyImage</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="SettingBnt">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>430</y>
+     <width>80</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Role</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="ImagePreview">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>40</y>
+     <width>250</width>
+     <height>250</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+  </widget>
+  <widget class="QTextBrowser" name="ImageNameInfo">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>300</y>
+     <width>256</width>
+     <height>71</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>880</x>
+     <y>460</y>
      <width>80</width>
      <height>20</height>
     </rect>
@@ -94,17 +143,40 @@
     <string>PushButton</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="SettingBnt">
+  <widget class="QPushButton" name="SetDesktop">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>250</y>
+     <x>990</x>
+     <y>460</y>
+     <width>80</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>SetDesktop</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_3">
+   <property name="geometry">
+    <rect>
+     <x>940</x>
+     <y>540</y>
      <width>80</width>
      <height>20</height>
     </rect>
    </property>
    <property name="text">
     <string>PushButton</string>
+   </property>
+  </widget>
+  <widget class="QTextBrowser" name="ImageSizeInfo">
+   <property name="geometry">
+    <rect>
+     <x>860</x>
+     <y>380</y>
+     <width>256</width>
+     <height>31</height>
+    </rect>
    </property>
   </widget>
  </widget>

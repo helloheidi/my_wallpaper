@@ -2,6 +2,8 @@
 
 #include <QWidget>
 #include "ui_mainwidget.h"
+#include "ImagePathGroup.h"
+#include "desktopwidget.h"
 
 class MainWidget : public QWidget
 {
@@ -9,26 +11,29 @@ class MainWidget : public QWidget
 
 public:
 	MainWidget(QWidget *parent = nullptr);
+	
 	~MainWidget();
 
 	
 
 private:
 	QPixmap createRoundedPixmap(const QPixmap& source, int radius);
+	void updateImageList();
 	Ui::MainWidgetClass* ui;
-	QWidget* mywidget;
-	//QListWidget* imgList;
 	QString path;
 	QStringList namefiles, files;
+	ImagePathGroup* ImagePaths;
+	DesktopWidget* desktopWidget;
 
 signals:
-	void sendIcon(QIcon icon, QString filename);
+	void sendImage(QListWidgetItem* item);
 
 public slots:
-	void addIconToList(QIcon icon, QString filename);
+	void addIconToList(QListWidgetItem* item);
 
 private slots:
-	void enlargeImage(QListWidgetItem* item);//∑≈¥ÛÕº∆¨
+	void enlargeImage(QListWidgetItem* item);//≤Èø¥Õº∆¨
+	void previewImage(QListWidgetItem* item);//‘§¿¿Õº∆¨
 	void on_ImageListBnt_clicked();
 	void on_MyImageBnt_clicked();
 };

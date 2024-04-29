@@ -70,6 +70,6 @@ void DesktopWidget::SetPixmap(const QString& fileName)
 	}
 	bkPixmap.load(fileName);
 	bklabel->setPixmap(bkPixmap);
-	//this->hide();
+	this->hide();
 	this->showFullScreen();
 }
