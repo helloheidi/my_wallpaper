@@ -12,12 +12,10 @@ RoleWidget::RoleWidget(QWidget *parent)
 	: QWidget(parent)
 	, rolelabel(new QLabel(this))
 	, curframe(0)
-	, desktopWidget(new DesktopWidget())
 {
 	//去掉窗口边框和让背景透明
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 	setAttribute(Qt::WA_TranslucentBackground);
-	desktopWidget->setParent(this, Qt::Window | Qt::SubWindow | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint);
 
 	//使用定时器更新动画
 	QTimer* updateTimer = new QTimer(this);
@@ -43,7 +41,7 @@ RoleWidget::RoleWidget(QWidget *parent)
 
 RoleWidget::~RoleWidget()
 {
-	desktopWidget->close();
+	
 }
 
 void RoleWidget::updateRoleAnimation()
@@ -91,11 +89,12 @@ void RoleWidget::initBtn()
 	connect(cutBtn, &QPushButton::clicked, this, []() {
 		QWidget* wid = new QWidget();
 		wid->setWindowFlags(Qt::Tool);
+		wid->setWindowTitle("fuck you");
 		wid->show();
 		});
 	connect(openBtn, &QPushButton::pressed, this, [=]() {
 			QString filename =  QFileDialog::getOpenFileName(nullptr, "选择壁纸", "./", "Image(*.jpg *.png)");
 			if (filename.isEmpty()) return;
-			desktopWidget->SetPixmap(filename);
+			//desktopWidget->SetPixmap(filename);
 		});
 }

@@ -1,4 +1,6 @@
 #include "desktopwidget.h"
+#include <QApplication>
+#include <QScreen>
 #include <QHBoxLayout>
 #include <qt_windows.h>
 #include <qvector.h>
@@ -12,8 +14,12 @@ DesktopWidget::DesktopWidget(QWidget *parent)
 	QHBoxLayout* layout = new QHBoxLayout(this);
 	layout->setMargin(0);
 	layout->addWidget(bklabel);
-
-	SetPixmap(":/resource/wallpaper/2.jpg");
+    // 获取主屏幕
+    QScreen* screen = QApplication::primaryScreen();
+    // 获取屏幕分辨率
+    QRect screenGeometry = screen->geometry();
+    screenWidth = screenGeometry.width();
+    screenHeight = screenGeometry.height();
     SetBackground((HWND)this->winId());
 }
 
@@ -69,6 +75,7 @@ void DesktopWidget::SetPixmap(const QString& fileName)
 		return;
 	}
 	bkPixmap.load(fileName);
+    bkPixmap = bkPixmap.scaled(screenWidth, screenHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 	bklabel->setPixmap(bkPixmap);
 	this->hide();
 	this->showFullScreen();

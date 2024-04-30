@@ -14,5 +14,10 @@
         <file>resource/wallpaper/3.jpeg</file>
         <file>resource/gif/1.gif</file>
         <file>resource/gif/2.gif</file>
+        <file>resource/button/icon.png</file>
+        <file>resource/button/icon1.png</file>
+        <file>resource/button/icon2.png</file>
+        <file>resource/background/Nahida-Kusanali.jpg</file>
+        <file>resource/icon.png</file>
     </qresource>
 </RCC>

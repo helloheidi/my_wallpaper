@@ -15,6 +15,9 @@ public:
 	void SetBackground(HWND child);
 	void SetPixmap(const QString& fileNname);
 
+	int screenWidth;
+	int screenHeight;
+
 private:
 	QLabel* bklabel;//·Å±ÚÖ½
 	QPixmap bkPixmap;

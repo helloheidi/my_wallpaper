@@ -23,5 +23,4 @@ private:
 	QPushButton* cutBtn;
 	QPushButton* openBtn;
 
-	DesktopWidget* desktopWidget;
 };

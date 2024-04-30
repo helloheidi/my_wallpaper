@@ -2,8 +2,9 @@
 
 #include <QWidget>
 #include "ui_mainwidget.h"
-#include "ImagePathGroup.h"
+#include "ImageGroup.h"
 #include "desktopwidget.h"
+#include "rolewidget.h"
 
 class MainWidget : public QWidget
 {
@@ -22,8 +23,14 @@ private:
 	Ui::MainWidgetClass* ui;
 	QString path;
 	QStringList namefiles, files;
-	ImagePathGroup* ImagePaths;
+	ImageGroup* ImagePaths;
+	QString selectImage;
 	DesktopWidget* desktopWidget;
+	RoleWidget* rolewidget;
+
+protected:
+	void closeEvent(QCloseEvent* event);
+	void paintEvent(QPaintEvent* event);
 
 signals:
 	void sendImage(QListWidgetItem* item);
@@ -35,5 +42,6 @@ private slots:
 	void enlargeImage(QListWidgetItem* item);//�鿴ͼƬ
 	void previewImage(QListWidgetItem* item);//Ԥ��ͼƬ
 	void on_ImageListBnt_clicked();
-	void on_MyImageBnt_clicked();
+	void on_SettingBnt_clicked();
+	void on_SetDesktop_clicked();
 };
