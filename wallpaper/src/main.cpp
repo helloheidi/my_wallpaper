@@ -1,6 +1,6 @@
 #include<qapplication.h>
-#include<rolewidget.h>
-#include <mainwidget.h>
+#include<include/rolewidget.h>
+#include <include/mainwidget.h>
 
 int main(int argc, char* argv[]) {
 	QApplication app(argc, argv);
