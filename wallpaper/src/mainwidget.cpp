@@ -13,10 +13,16 @@ MainWidget::MainWidget(QWidget *parent)
 	: QWidget(parent)
 	, ui(new Ui::MainWidgetClass)
     , desktopWidget(new DesktopWidget())
+    , imageMode_(0)
 {
     init();
     imageGroup = new ImageGroup();
     imageGroup->creatPreviewPixmap();
+    //设置默认桌面为图片列表第一张模式为填充
+    selectImage_ = imageGroup->GetAllImage().at(0);
+    desktopWidget->SetfilePath(selectImage_);
+    desktopWidget->SetimageMode(imageMode_);
+    //desktopWidget->UpdateWallpaper();
     //QThread* thread = new QThread;   // 创建一个 QThread 对象
     //imageGroup = new ImageGroup(path, files);
     //imageGroup->moveToThread(thread);
@@ -56,21 +62,25 @@ void MainWidget::init()
     ui->ImagelistWidget->setMovement(QListView::Static);//设置列表每一项不可移动
     //设置桌面图片填充模式
     ui->wallpaperMode->setFont(font);
-    ui->wallpaperMode->addItem("拉伸", QVariant("stretch"));
-    ui->wallpaperMode->addItem("适合", QVariant("fit"));
     ui->wallpaperMode->addItem("填充", QVariant("fill"));
+    ui->wallpaperMode->addItem("适应", QVariant("fit"));
+    ui->wallpaperMode->addItem("拉伸", QVariant("stretch"));   
     ui->wallpaperMode->addItem("居中", QVariant("center"));
     ui->wallpaperMode->addItem("平铺", QVariant("tile"));
-    //connect(ui->wallpaperMode, SIGNAL(currentIndexChanged(int)), this, SLOT(onComboBoxChanged()));
+
+    connect(ui->wallpaperMode, SIGNAL(currentIndexChanged(int)), this, SLOT(updateImageMode(int)));
 }
 
-void MainWidget::addIconToList(QListWidgetItem* newitem) {
+void MainWidget::addIconToList(QListWidgetItem* newitem, ListWidgetItem* itemWidget) {
     ui->ImagelistWidget->addItem(newitem);
+    ui->ImagelistWidget->setItemWidget(newitem, itemWidget);
 }
 
 
-void MainWidget::updateImageList() {
-
+void MainWidget::updateImageMode(int imageMode) {
+    imageMode_ = imageMode;
+    desktopWidget->SetimageMode(imageMode);
+    desktopWidget->UpdateWallpaper();
 }
 
 //查看图片
@@ -84,13 +94,13 @@ void MainWidget::enlargeImage(QListWidgetItem* item) {
 
 //预览图片
 void MainWidget::previewImage(QListWidgetItem* item) {
-    selectImage = item->data(Qt::UserRole).toString();
-    QPixmap Image = QPixmap(selectImage);
+    selectImage_ = item->data(Qt::UserRole).toString();
+    QPixmap Image = QPixmap(selectImage_);
     QString Imagesize = QString("%1 × %2").arg(Image.width()).arg(Image.height());
     Image = Image.scaled(ui->ImagePreview->width(), ui->ImagePreview->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     ui->ImagePreview->setPixmap(Image);
     ui->ImageSizeInfo->setPlainText(Imagesize);
-    ui->ImageNameInfo->setPlainText(selectImage.section('/', -1));
+    ui->ImageNameInfo->setPlainText(selectImage_.section('/', -1));
 }
 
 MainWidget::~MainWidget()
@@ -119,7 +129,9 @@ void MainWidget::on_SettingBnt_clicked() {
 }
 
 void MainWidget::on_SetDesktop_clicked() {
-    desktopWidget->SetPixmap(selectImage);
+    desktopWidget->SetfilePath(selectImage_);
+    desktopWidget->SetimageMode(imageMode_);
+    desktopWidget->UpdateWallpaper();
 }
 
 void MainWidget::closeEvent(QCloseEvent* event)

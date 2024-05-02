@@ -2,16 +2,18 @@
 #include<include/rolewidget.h>
 #include <include/mainwidget.h>
 
+
 int main(int argc, char* argv[]) {
-	QApplication app(argc, argv);
-	/*RoleWidget w;
-	w.show();*/
+    QApplication app(argc, argv);
+    /*RoleWidget w;
+    w.show();*/
     /*CustomWidget customWidget;
     customWidget.show();*/
-	MainWidget mainwidget;
-	mainwidget.show();
-	return app.exec();
+    MainWidget mainwidget;
+    mainwidget.show();
+    return app.exec();
 }
+
 //#include <QApplication>
 //#include <QListWidget>
 //#include <QListWidgetItem>

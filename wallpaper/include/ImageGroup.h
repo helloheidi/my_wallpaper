@@ -3,6 +3,7 @@
 #include <qstringlist.h>
 #include <qpixmap.h>
 #include <qlistWidget.h>
+#include "include/listwidgetitem.h"
 class ImageGroup : public QObject
 {
 	Q_OBJECT
@@ -27,7 +28,7 @@ private:
 	QPixmap createRoundedPixmap(const QPixmap& source, int radius);
 
 signals:
-	void sendImage(QListWidgetItem* item);
+	void sendImage(QListWidgetItem* item, ListWidgetItem* itemWidget);
 	void finished();
 
 public slots:

@@ -5,12 +5,16 @@
 #include <qdir.h>
 #include <qdiriterator.h>
 #include <qset.h>
+#include <QLabel>
+#include <QMovie>
+#include <QBitmap>
 
 ImageGroup::ImageGroup(QObject* parent)
     : QObject(parent)
 {
     QString path1 = QString(QDir::currentPath() + "/resource/mywallpaper/");//本地图片路径
-    QDirIterator it(path1, QStringList() << "*.png" << "*.jpg" << "*.jpeg", QDir::Files, QDirIterator::Subdirectories);
+    //QDirIterator it(path1, QStringList() << "*.png" << "*.jpg" << "*.jpeg", QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator it(path1, QStringList() << "*.gif", QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         new_images_ << it.next();
     }
@@ -64,19 +68,38 @@ void ImageGroup::creatPreviewPixmap()
         // 异步加载图片
         QtConcurrent::run([=]() {
             qDebug() << new_images_.at(i);
-            QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
-            QListWidgetItem* newitem = new QListWidgetItem(icon, "");
+            //QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
+            QListWidgetItem* newitem = new QListWidgetItem;
+            ListWidgetItem* itemWidget = new ListWidgetItem(imagePath);
             //newitem->setSizeHint(QSize(125, 125));
             newitem->setData(Qt::UserRole, QVariant(imagePath));
             newitem->setText(""); // 如果不需要显示文本
             newitem->setTextAlignment(Qt::AlignHCenter);
             //ui->ImagelistWidget->addItem(newitem);
-            emit sendImage(newitem);
+            emit sendImage(newitem, itemWidget);
             });
     }
 }
+
 //为缩略图添加圆角
 QPixmap ImageGroup::createRoundedPixmap(const QPixmap& source, int radius) {
+
+    //QLabel* label = new QLabel;
+    //QMovie* movie = new QMovie(gifPath);
+    //label->setMovie(movie);
+    //movie->start();
+
+    //QBitmap bitmap(movie->currentPixmap().size());
+    //bitmap.fill(Qt::color0);  // 初始化为全透明
+
+    //QPainter painter(&bitmap);
+    //painter.setRenderHint(QPainter::Antialiasing, true); // 开启抗锯齿
+    //QPainterPath path;
+    //path.addRoundedRect(0, 0, bitmap.width(), bitmap.height(), 50, 50);  // 注意这里直接使用控件的宽度和高度
+
+    //painter.fillPath(path, Qt::color1);  // 使用不透明的颜色填充路径
+    //label->setMask(bitmap);  // 应用遮罩
+
     if (source.isNull()) return QPixmap();  // 返回空的 QPixmap 如果源是空的
 
     QPixmap pixmap(source.size());
