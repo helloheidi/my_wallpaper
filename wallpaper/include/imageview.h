@@ -1,7 +1,4 @@
 #pragma once
-#if _MSC_VER >= 1600
-#pragma execution_character_set("utf-8")
-#endif
 
 #include <QWidget>
 #include <QListWidget>
@@ -15,22 +12,22 @@ public:
 	ImageView(QWidget* parent = 0);
 	~ImageView();
 
-	//´ÓÎÄ¼şÂ·¾¶¼ÓÔØÍ¼Æ¬
+	//ä»æ–‡ä»¶è·¯å¾„åŠ è½½å›¾ç‰‡
 	void SetImage(const QString& img_path);
-	//ÖØĞÂÉèÖÃËõ·Å±ÈÀı
+	//é‡æ–°è®¾ç½®ç¼©æ”¾æ¯”ä¾‹
 	void ResetTransform();
 
 private:
 
-    //Ô­Ê¼pixmapĞÅÏ¢
+    //åŸå§‹pixmapä¿¡æ¯
     QPixmap pix_ori_;
-    //ÓÃÀ´Õ¹Ê¾µÄpixmapĞÅÏ¢
+    //ç”¨æ¥å±•ç¤ºçš„pixmapä¿¡æ¯
     QPixmap pix_display_;
-    //Í¼Æ¬Â·¾¶
+    //å›¾ç‰‡è·¯å¾„
     QString img_path_;
-    //Êó±ê¹öÂÖ¿ØÖÆµÄËõ·Å±ÈÀı
+    //é¼ æ ‡æ»šè½®æ§åˆ¶çš„ç¼©æ”¾æ¯”ä¾‹
     float zoom_scale_;
-    //ÓÉÊó±êÒÆ¶¯¿ØÖÆµÄÒÆ¶¯
+    //ç”±é¼ æ ‡ç§»åŠ¨æ§åˆ¶çš„ç§»åŠ¨
     QPoint move_step_;
     bool move_start_;
     bool is_moving_;

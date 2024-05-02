@@ -13,16 +13,16 @@ RoleWidget::RoleWidget(QWidget *parent)
 	, rolelabel(new QLabel(this))
 	, curframe(0)
 {
-	//È¥µô´°¿Ú±ß¿òºÍÈÃ±³¾°Í¸Ã÷
+	//åŽ»æŽ‰çª—å£è¾¹æ¡†å’Œè®©èƒŒæ™¯é€æ˜Ž
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 	setAttribute(Qt::WA_TranslucentBackground);
 
-	//Ê¹ÓÃ¶¨Ê±Æ÷¸üÐÂ¶¯»­
+	//ä½¿ç”¨å®šæ—¶å™¨æ›´æ–°åŠ¨ç”»
 	QTimer* updateTimer = new QTimer(this);
 	updateTimer->callOnTimeout(this, &RoleWidget::updateRoleAnimation);
 	updateTimer->start(500);
 
-	//¸ø´°¿ÚÉèÖÃÒõÓ°
+	//ç»™çª—å£è®¾ç½®é˜´å½±
 	QGraphicsDropShadowEffect* effect = new QGraphicsDropShadowEffect(this);
 	effect->setColor(QColor(100, 100, 100, 100));
 	effect->setBlurRadius(5);
@@ -49,18 +49,17 @@ void RoleWidget::updateRoleAnimation()
 	QString qss("background-repeat:no-repeat;");
 	rolelabel->setStyleSheet(qss + QString("background-image:url(:/resource/desktopRole/summerGril/%1.png);").arg(curframe));
 	curframe = (curframe +1) % 6;
-	//rolelabel->setStyleSheet(qss + "background-image:url(:/resource/wallpaper/1.jpg);");
 }
 
 bool RoleWidget::eventFilter(QObject* watched, QEvent* ev)
 {
 	QMouseEvent* mouseev = static_cast<QMouseEvent*>(ev);
-	//ÅÐ¶ÏÊó±ê×ó¼ü°´ÏÂ
+	//åˆ¤æ–­é¼ æ ‡å·¦é”®æŒ‰ä¸‹
 	static QPoint begpos;
 	if (ev->type() == QEvent::MouseButtonPress) {
 		begpos = mouseev->globalPos() - this->pos();
 	}
-	//ÅÐ¶ÏÊó±êÒÆ¶¯
+	//åˆ¤æ–­é¼ æ ‡ç§»åŠ¨
 	else if (ev->type() == QEvent::MouseMove && mouseev->buttons() & Qt::MouseButton::LeftButton) {
 		this->move(mouseev->globalPos() - begpos);
 	}
@@ -93,7 +92,7 @@ void RoleWidget::initBtn()
 		wid->show();
 		});
 	connect(openBtn, &QPushButton::pressed, this, [=]() {
-			QString filename =  QFileDialog::getOpenFileName(nullptr, "Ñ¡Ôñ±ÚÖ½", "./", "Image(*.jpg *.png)");
+			QString filename =  QFileDialog::getOpenFileName(nullptr, "é€‰æ‹©å£çº¸", "./", "Image(*.jpg *.png)");
 			if (filename.isEmpty()) return;
 			//desktopWidget->SetPixmap(filename);
 		});

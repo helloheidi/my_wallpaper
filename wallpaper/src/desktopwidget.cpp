@@ -14,9 +14,9 @@ DesktopWidget::DesktopWidget(QWidget *parent)
 	QHBoxLayout* layout = new QHBoxLayout(this);
 	layout->setMargin(0);
 	layout->addWidget(bklabel);
-    // »ñÈ¡Ö÷ÆÁÄ»
+    // èŽ·å–ä¸»å±å¹•
     QScreen* screen = QApplication::primaryScreen();
-    // »ñÈ¡ÆÁÄ»·Ö±æÂÊ
+    // èŽ·å–å±å¹•åˆ†è¾¨çŽ‡
     QRect screenGeometry = screen->geometry();
     screenWidth = screenGeometry.width();
     screenHeight = screenGeometry.height();
@@ -26,14 +26,14 @@ DesktopWidget::DesktopWidget(QWidget *parent)
 DesktopWidget::~DesktopWidget()
 {}
 
-//»ñÈ¡±³¾°´°Ìå¾ä±ú
+//èŽ·å–èƒŒæ™¯çª—ä½“å¥æŸ„
 HWND DesktopWidget::GetBackground() {
-    //±³¾°´°ÌåÃ»ÓÐ´°ÌåÃû£¬µ«ÊÇÖªµÀËüµÄÀàÃûÊÇworkerW£¬ÇÒÓÐ¸¸´°ÌåProgram Maneger£¬ËùÒÔÖ»Òª
-    //±éÀúËùÓÐworkerWÀàÐÍµÄ´°Ìå£¬ÖðÒ»±È½ÏËüµÄ¸¸´°ÌåÊÇ²»ÊÇProgram Manager¾Í¿ÉÒÔÕÒµ½±³¾°´°Ìå
+    //èƒŒæ™¯çª—ä½“æ²¡æœ‰çª—ä½“åï¼Œä½†æ˜¯çŸ¥é“å®ƒçš„ç±»åæ˜¯workerWï¼Œä¸”æœ‰çˆ¶çª—ä½“Program Manegerï¼Œæ‰€ä»¥åªè¦
+    //éåŽ†æ‰€æœ‰workerWç±»åž‹çš„çª—ä½“ï¼Œé€ä¸€æ¯”è¾ƒå®ƒçš„çˆ¶çª—ä½“æ˜¯ä¸æ˜¯Program Managerå°±å¯ä»¥æ‰¾åˆ°èƒŒæ™¯çª—ä½“
     HWND hwnd = FindWindowA("progman", "Program Manager");
     HWND worker = NULL;
     do {
-        worker = FindWindowExA(NULL, worker, "workerW", NULL); // ¸ù¾ÝÀàÃû»ñÈ¡´°Ìå¾ä±ú
+        worker = FindWindowExA(NULL, worker, "workerW", NULL); // æ ¹æ®ç±»åèŽ·å–çª—ä½“å¥æŸ„
         if (worker != NULL) {
             char buff[200] = { 0 };
             int ret = GetClassNameA(worker, (PCHAR)buff, sizeof(buff) * 2);
@@ -41,14 +41,14 @@ HWND DesktopWidget::GetBackground() {
                 return NULL;
             }
             if (GetParent(worker) == hwnd) {
-                return worker;//·µ»Ø½á¹û
+                return worker;//è¿”å›žç»“æžœ
             }
         }
     } while (worker != NULL);
-    //Ã»ÓÐÕÒµ½
-    //·¢ËÍÏûÏ¢Éú³ÉÒ»¸öWorkerW´°Ìå
+    //æ²¡æœ‰æ‰¾åˆ°
+    //å‘é€æ¶ˆæ¯ç”Ÿæˆä¸€ä¸ªWorkerWçª—ä½“
     SendMessage(hwnd, 0x052C, 0, 0);
-    //ÖØ¸´ÉÏÃæ²½Öè
+    //é‡å¤ä¸Šé¢æ­¥éª¤
     do {
         worker = FindWindowExA(NULL, worker, "workerW", NULL);
         if (worker != NULL) {
@@ -58,7 +58,7 @@ HWND DesktopWidget::GetBackground() {
                 return NULL;
             }
             if (GetParent(worker) == hwnd) {
-                return worker;//·µ»Ø½á¹û
+                return worker;//è¿”å›žç»“æžœ
             }
         }
     } while (worker != NULL);
@@ -66,7 +66,7 @@ HWND DesktopWidget::GetBackground() {
 }
 
 void DesktopWidget::SetBackground(HWND child) {
-    SetParent(child, GetBackground()); // °ÑÊÓÆµ´°¿ÚÉèÖÃÎªProgram ManagerµÄ¶ù×Ó
+    SetParent(child, GetBackground()); // æŠŠè§†é¢‘çª—å£è®¾ç½®ä¸ºProgram Managerçš„å„¿å­
 }
 
 void DesktopWidget::SetPixmap(const QString& fileName)
@@ -76,7 +76,12 @@ void DesktopWidget::SetPixmap(const QString& fileName)
 	}
 	bkPixmap.load(fileName);
     bkPixmap = bkPixmap.scaled(screenWidth, screenHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    //bkPixmap = bkPixmap.scaled(screenWidth, screenHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 	bklabel->setPixmap(bkPixmap);
-	this->hide();
+    /*QPalette palette;
+    palette.setBrush(bklabel->backgroundRole(), QBrush(bkPixmap));
+    bklabel->setAutoFillBackground(true);
+    bklabel->setPalette(palette);*/
+	//this->hide();
 	this->showFullScreen();
 }

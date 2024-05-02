@@ -19,6 +19,6 @@ public:
 	int screenHeight;
 
 private:
-	QLabel* bklabel;//�ű�ֽ
+	QLabel* bklabel;//放壁纸
 	QPixmap bkPixmap;
 };

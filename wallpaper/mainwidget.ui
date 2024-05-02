@@ -27,6 +27,14 @@ QWidget#MainWidgetClass {
 	border:none;
 	background-color: rgba(255, 170, 255, 0);
 }
+#scrollAreaWidgetContents {
+	border:none;
+	background:transparent;
+}
+QScrollArea#scrollArea {
+	border:none;
+	background:transparent;
+}
 QLabel#ImagePreview {
 	background:transparent;
 }
@@ -75,39 +83,6 @@ QStackedWidget#stackedWidget {
 	background:transparent;
 }</string>
   </property>
-  <widget class="QLabel" name="ImagePreview">
-   <property name="geometry">
-    <rect>
-     <x>860</x>
-     <y>40</y>
-     <width>250</width>
-     <height>250</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-  </widget>
-  <widget class="QTextBrowser" name="ImageNameInfo">
-   <property name="geometry">
-    <rect>
-     <x>860</x>
-     <y>300</y>
-     <width>250</width>
-     <height>35</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QTextBrowser" name="ImageSizeInfo">
-   <property name="geometry">
-    <rect>
-     <x>860</x>
-     <y>340</y>
-     <width>250</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QFrame" name="frame">
    <property name="geometry">
     <rect>
@@ -204,24 +179,92 @@ QStackedWidget#stackedWidget {
      </widget>
     </widget>
    </widget>
-   <widget class="QPushButton" name="SetDesktop">
+   <widget class="QScrollArea" name="scrollArea">
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>440</y>
-      <width>201</width>
-      <height>111</height>
+      <x>860</x>
+      <y>10</y>
+      <width>260</width>
+      <height>588</height>
      </rect>
     </property>
-    <property name="text">
-     <string/>
+    <property name="widgetResizable">
+     <bool>true</bool>
     </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>260</width>
+       <height>588</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <widget class="QPushButton" name="SetDesktop">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>360</y>
+        <width>201</width>
+        <height>111</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="ImageSizeInfo">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>310</y>
+        <width>250</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="ImageNameInfo">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>260</y>
+        <width>250</width>
+        <height>35</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="ImagePreview">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>0</y>
+        <width>250</width>
+        <height>250</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="wallpaperMode">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>470</y>
+        <width>69</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
-  <zorder>frame</zorder>
-  <zorder>ImagePreview</zorder>
-  <zorder>ImageNameInfo</zorder>
-  <zorder>ImageSizeInfo</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

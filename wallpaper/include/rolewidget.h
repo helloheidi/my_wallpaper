@@ -18,7 +18,7 @@ public:
 
 private:
 	QLabel* rolelabel;
-	qint8 curframe;//��ǰ֡
+	qint8 curframe;//当前帧
 	QPushButton* closeBtn;
 	QPushButton* cutBtn;
 	QPushButton* openBtn;

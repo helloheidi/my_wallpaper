@@ -23,50 +23,50 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="src\desktopwidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rolewidget.cpp">
+    <ClCompile Include="src\ImageGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="desktopwidget.cpp">
+    <ClCompile Include="src\imageview.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mainwidget.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="imageview.cpp">
+    <ClCompile Include="src\mainwidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ImageGroup.cpp">
+    <ClCompile Include="src\rolewidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="rolewidget.h">
+    <QtMoc Include="include\desktopwidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="desktopwidget.h">
+    <QtMoc Include="include\ImageGroup.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="mainwidget.h">
+    <QtMoc Include="include\imageview.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="imageview.h">
+    <QtMoc Include="include\mainwidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="ImageGroup.h">
+    <QtMoc Include="include\rolewidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-  </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="Resource.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="mainwidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="Resource.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
   </ItemGroup>
 </Project>

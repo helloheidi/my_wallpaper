@@ -14,13 +14,13 @@ ImageView::ImageView(QWidget* parent)
     is_moving_ = false;
 
     //qApp->installEventFilter(this);
-    //this->setGeometry(rect);//ÉèÖÃÏÔÊ¾Í¼Æ¬´°¿ÚµÄx¡¢y¡¢w¡¢h
-    //this->setFixedSize(rect.width(), rect.height());//ÉèÖÃ´°¿Ú¹Ì¶¨´óÐ¡
+    //this->setGeometry(rect);//è®¾ç½®æ˜¾ç¤ºå›¾ç‰‡çª—å£çš„xã€yã€wã€h
+    //this->setFixedSize(rect.width(), rect.height());//è®¾ç½®çª—å£å›ºå®šå¤§å°
     //this->setWindowIcon(item->icon());
-    this->setWindowTitle("²é¿´Í¼Æ¬");
-    //this->setWindowModality(Qt::ApplicationModal);//×èÈû³ýµ±Ç°´°ÌåÍâµÄÆäËûËùÓÐ´°Ìå
+    this->setWindowTitle("æŸ¥çœ‹å›¾ç‰‡");
+    //this->setWindowModality(Qt::ApplicationModal);//é˜»å¡žé™¤å½“å‰çª—ä½“å¤–çš„å…¶ä»–æ‰€æœ‰çª—ä½“
 
-    ////Í¨¹ýQLabel¼ÓÔØitemÉÏµÄÍ¼Æ¬
+    ////é€šè¿‡QLabelåŠ è½½itemä¸Šçš„å›¾ç‰‡
     //QLabel* lab = new QLabel(this);
     //lab->setFixedSize(this->width(), this->height());
     //lab->setPixmap(item->icon().pixmap(QSize(this->width(), this->height())).scaled(lab->width(), lab->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -36,7 +36,7 @@ void ImageView::SetImage(const QString& img_path)
 {
     ResetTransform();
     QSize view_size = size();
-    //Í¨¹ýQPixmap¼ÓÔØÍ¼Ïñ
+    //é€šè¿‡QPixmapåŠ è½½å›¾åƒ
     img_path_ = img_path;
     pix_ori_.load(img_path_);
     pix_display_ = pix_ori_.scaled(zoom_scale_ * size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -45,7 +45,7 @@ void ImageView::SetImage(const QString& img_path)
 
 void ImageView::ResetTransform()
 {
-    //ÖØÐÂÉèÖÃËõ·Å±ÈÀýºÍÒÆ¶¯Î»ÖÃ
+    //é‡æ–°è®¾ç½®ç¼©æ”¾æ¯”ä¾‹å’Œç§»åŠ¨ä½ç½®
     zoom_scale_ = 1.0f;
     move_step_ = QPoint(0, 0);
 }
@@ -58,7 +58,7 @@ void ImageView::paintEvent(QPaintEvent* event)
 
 void ImageView::wheelEvent(QWheelEvent* event)
 {
-    //Ëæ¹öÂÖËõ·Å
+    //éšæ»šè½®ç¼©æ”¾
     if (event->delta() > 0)
     {
         zoom_scale_ *= 1.1;
@@ -113,7 +113,7 @@ void ImageView::resizeEvent(QResizeEvent* event)
     update();
 }
 
-//ÊÂ¼þ¹ýÂËÆ÷£¬ÊµÏÖµã»÷´°¿ÚÈÎÒâÎ»ÖÃ£¬´°¿Ú¾Í¿ÉÒÔ¹Ø±Õ
+//äº‹ä»¶è¿‡æ»¤å™¨ï¼Œå®žçŽ°ç‚¹å‡»çª—å£ä»»æ„ä½ç½®ï¼Œçª—å£å°±å¯ä»¥å…³é—­
 bool ImageView::eventFilter(QObject* obj, QEvent* e)
 {
     if (e->type() == QEvent::MouseButtonPress)

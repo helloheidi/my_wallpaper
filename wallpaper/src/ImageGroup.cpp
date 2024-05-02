@@ -1,63 +1,93 @@
 #include "include/ImageGroup.h"
 #include <qdebug.h>
 #include <qpainter.h>
+#include <QtConcurrent/qtconcurrentrun.h>
+#include <qdir.h>
+#include <qdiriterator.h>
+#include <qset.h>
 
-
-ImageGroup::ImageGroup(const QString& path, const QStringList& img_names, QObject* parent)
+ImageGroup::ImageGroup(QObject* parent)
     : QObject(parent)
-    , all_images_(img_names)
-    , path_(path)
 {
-    //creatPreviewPixmap(all_images_);
+    QString path1 = QString(QDir::currentPath() + "/resource/mywallpaper/");//æœ¬åœ°å›¾ç‰‡è·¯å¾„
+    QDirIterator it(path1, QStringList() << "*.png" << "*.jpg" << "*.jpeg", QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        new_images_ << it.next();
+    }
+    all_images_.append(new_images_);
 }
 
 ImageGroup::~ImageGroup()
 {
 }
 
-//ÏòÍ¼Æ¬Êı×éÖĞÌí¼ÓÍ¼Æ¬
+//å‘å›¾ç‰‡æ•°ç»„ä¸­æ·»åŠ å›¾ç‰‡
 bool ImageGroup::addImage(const QStringList& img_paths)
 {
     if (img_paths.empty()) return false;
-    //Çå¿ÕĞÂÔöÍ¼Æ¬Êı×é
+    //æ¸…ç©ºæ–°å¢å›¾ç‰‡æ•°ç»„
     new_images_.clear();
     new_images_ = img_paths;
-    for (auto& path : img_paths)
-    {
-        all_images_.push_back(path);
+    //ä»æ–°æ·»åŠ çš„å›¾ç‰‡åˆ—è¡¨ä¸­æå‡ºæºåˆ—è¡¨ä¸­å·²ç»å­˜åœ¨çš„å›¾ç‰‡è·¯å¾„
+    QSet<QString> pathsSet(all_images_.begin(), all_images_.end());
+    QStringList filteredNewPaths;
+    for (const QString& path : new_images_) {
+        if (!pathsSet.contains(path)) {
+            filteredNewPaths.append(path);
+            qDebug() << "fuck you" << path;
+        }
     }
+    new_images_ = filteredNewPaths;
+    //å°†æ–°å¢å›¾ç‰‡æ·»åŠ è‡³å…¨éƒ¨å›¾ç‰‡æ•°ç»„
+    all_images_.reserve(all_images_.size() + new_images_.size());
+    all_images_.append(new_images_);
     return true;
 }
-//Éú³ÉËõÂÔÍ¼²¢Ìí¼Óitem
+//ç”Ÿæˆç¼©ç•¥å›¾å¹¶æ·»åŠ item
 void ImageGroup::creatPreviewPixmap()
 {
-    for (int i = 0; i < all_images_.size(); i++) {
-        qDebug() << all_images_.at(i);
-        QString imagePath = path_ + "/" + all_images_.at(i);
-        QPixmap PreviewPixmap = QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        QIcon icon(createRoundedPixmap(PreviewPixmap, 5));
-        QListWidgetItem* newitem = new QListWidgetItem(icon, "");
-        newitem->setSizeHint(QSize(PreviewPixmap.width(), PreviewPixmap.height()));
-        newitem->setData(Qt::UserRole, QVariant(imagePath));
-        newitem->setText(""); // ²»ĞèÒªÏÔÊ¾ÎÄ±¾
-        newitem->setTextAlignment(Qt::AlignHCenter);
-        emit sendImage(newitem);
+    //for (int i = 0; i < all_images_.size(); i++) {
+    //    qDebug() << all_images_.at(i);
+    //    QString imagePath = path_ + "/" + all_images_.at(i);
+    //    QPixmap PreviewPixmap = QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    //    QIcon icon(createRoundedPixmap(PreviewPixmap, 5));
+    //    QListWidgetItem* newitem = new QListWidgetItem(icon, "");
+    //    newitem->setSizeHint(QSize(PreviewPixmap.width(), PreviewPixmap.height()));
+    //    newitem->setData(Qt::UserRole, QVariant(imagePath));
+    //    newitem->setText(""); // ä¸éœ€è¦æ˜¾ç¤ºæ–‡æœ¬
+    //    newitem->setTextAlignment(Qt::AlignHCenter);
+    //    emit sendImage(newitem);
+    //}
+    //emit finished();
+     for (int i = 0; i < new_images_.size(); ++i) {
+        QString imagePath = new_images_.at(i);
+        // å¼‚æ­¥åŠ è½½å›¾ç‰‡
+        QtConcurrent::run([=]() {
+            qDebug() << new_images_.at(i);
+            QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
+            QListWidgetItem* newitem = new QListWidgetItem(icon, "");
+            //newitem->setSizeHint(QSize(125, 125));
+            newitem->setData(Qt::UserRole, QVariant(imagePath));
+            newitem->setText(""); // å¦‚æœä¸éœ€è¦æ˜¾ç¤ºæ–‡æœ¬
+            newitem->setTextAlignment(Qt::AlignHCenter);
+            //ui->ImagelistWidget->addItem(newitem);
+            emit sendImage(newitem);
+            });
     }
-    emit finished();
 }
-//ÎªËõÂÔÍ¼Ìí¼ÓÔ²½Ç
+//ä¸ºç¼©ç•¥å›¾æ·»åŠ åœ†è§’
 QPixmap ImageGroup::createRoundedPixmap(const QPixmap& source, int radius) {
-    if (source.isNull()) return QPixmap();  // ·µ»Ø¿ÕµÄ QPixmap Èç¹ûÔ´ÊÇ¿ÕµÄ
+    if (source.isNull()) return QPixmap();  // è¿”å›ç©ºçš„ QPixmap å¦‚æœæºæ˜¯ç©ºçš„
 
     QPixmap pixmap(source.size());
-    pixmap.fill(Qt::transparent);  // Ê¹ÓÃÍ¸Ã÷ÑÕÉ«Ìî³ä
+    pixmap.fill(Qt::transparent);  // ä½¿ç”¨é€æ˜é¢œè‰²å¡«å……
 
     QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing, true);  // ¿¹¾â³İ
-    painter.setBrush(QBrush(source));  // ÉèÖÃ»­Ë¢ÎªÔ­Í¼
-    painter.setPen(Qt::NoPen);  // ÉèÖÃÎŞ±ß¿ò»­±Ê£¬Ïû³ı±ß¿ò
+    painter.setRenderHint(QPainter::Antialiasing, true);  // æŠ—é”¯é½¿
+    painter.setBrush(QBrush(source));  // è®¾ç½®ç”»åˆ·ä¸ºåŸå›¾
+    painter.setPen(Qt::NoPen);  // è®¾ç½®æ— è¾¹æ¡†ç”»ç¬”ï¼Œæ¶ˆé™¤è¾¹æ¡†
 
-    // »æÖÆÔ²½Ç¾ØĞÎ£¬Ìî³äÇøÓòÎªÕû¸öÍ¼Ïñ
+    // ç»˜åˆ¶åœ†è§’çŸ©å½¢ï¼Œå¡«å……åŒºåŸŸä¸ºæ•´ä¸ªå›¾åƒ
     painter.drawRoundedRect(pixmap.rect(), radius, radius);
 
     return pixmap;

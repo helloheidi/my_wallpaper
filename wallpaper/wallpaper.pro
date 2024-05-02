@@ -1,4 +1,6 @@
-QT -= gui
+QT += core gui widgets
+
+LIBS += -lUser32
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -15,9 +17,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        main.cpp
+    src/ImageGroup.cpp \
+    src/desktopwidget.cpp \
+    src/imageview.cpp \
+    src/main.cpp \
+    src/mainwidget.cpp \
+    src/rolewidget.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+HEADERS += \
+    include/ImageGroup.h \
+    include/desktopwidget.h \
+    include/imageview.h \
+    include/mainwidget.h \
+    include/rolewidget.h
+
+RESOURCES += \
+    Resource.qrc
+
+FORMS += \
+    mainwidget.ui

@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9E1CA2B6-7EB3-4E9E-978F-55DF17ED057F}</ProjectGuid>
+    <ProjectGuid>{0C12B5E3-0FC7-461B-92E8-DD1F82E391DD}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
@@ -42,7 +42,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>5.14.2_msvc2017_64</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>core</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -65,7 +65,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalOptions>/UTF-8</AdditionalOptions>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -97,33 +102,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="desktopwidget.cpp" />
-    <ClCompile Include="ImageGroup.cpp" />
-    <ClCompile Include="imageview.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="mainwidget.cpp" />
-    <ClCompile Include="rolewidget.cpp" />
+    <ClCompile Include="src\desktopwidget.cpp" />
+    <ClCompile Include="src\ImageGroup.cpp" />
+    <ClCompile Include="src\imageview.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mainwidget.cpp" />
+    <ClCompile Include="src\rolewidget.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="rolewidget.h" />
+    <QtMoc Include="include\desktopwidget.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="Resource.qrc" />
+    <QtMoc Include="include\ImageGroup.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="desktopwidget.h" />
+    <QtMoc Include="include\imageview.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="mainwidget.h" />
+    <QtMoc Include="include\mainwidget.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="imageview.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="ImageGroup.h" />
+    <QtMoc Include="include\rolewidget.h" />
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="mainwidget.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="Resource.qrc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

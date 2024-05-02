@@ -18,11 +18,10 @@ public:
 	
 
 private:
-	QPixmap createRoundedPixmap(const QPixmap& source, int radius);
 	void updateImageList();
+	void init();
 	Ui::MainWidgetClass* ui;
-	QString path;
-	QStringList namefiles, files;
+
 	ImageGroup* imageGroup;
 	QString selectImage;
 	DesktopWidget* desktopWidget;
@@ -39,8 +38,8 @@ public slots:
 	void addIconToList(QListWidgetItem* item);
 
 private slots:
-	void enlargeImage(QListWidgetItem* item);//�鿴ͼƬ
-	void previewImage(QListWidgetItem* item);//Ԥ��ͼƬ
+	void enlargeImage(QListWidgetItem* item);//查看图片
+	void previewImage(QListWidgetItem* item);//预览图片
 	void on_ImageListBnt_clicked();
 	void on_SettingBnt_clicked();
 	void on_SetDesktop_clicked();

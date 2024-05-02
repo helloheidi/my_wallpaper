@@ -3,10 +3,9 @@
 
 #include <qdebug.h>
 #include <qlistWidget.h>
-#include <qdir.h>
+
 #include <qfiledialog.h>
 #include <QVBoxLayout>
-#include <QtConcurrent/qtconcurrentrun.h>
 #include <qpainter.h>
 
 
@@ -15,57 +14,23 @@ MainWidget::MainWidget(QWidget *parent)
 	, ui(new Ui::MainWidgetClass)
     , desktopWidget(new DesktopWidget())
 {
-	ui->setupUi(this);
-    this->setWindowIcon(QIcon(":/resource/icon.png"));
-    // ÉèÖÃ QTextBrowser µÄÄ¬ÈÏ×ÖÌå
-    QFont font("Microsoft YaHei", 10);  // ×ÖÌåÃûºÍ×ÖÌå´óĞ¡
-    ui->ImageSizeInfo->setFont(font);
-    ui->ImageNameInfo->setFont(font);
-	ui->ImagelistWidget->setIconSize(QSize(125, 125));//ÉèÖÃµ¥¸öIcon´óĞ¡
-	ui->ImagelistWidget->setViewMode(QListView::IconMode);//ÉèÖÃÏÔÊ¾Ä£Ê½
-	ui->ImagelistWidget->setFlow(QListView::LeftToRight);//´Ó×óµ½ÓÒ
-	ui->ImagelistWidget->setResizeMode(QListView::Adjust);//´óĞ¡×ÔÊÊÓ¦
-	ui->ImagelistWidget->setMovement(QListView::Static);//ÉèÖÃÁĞ±íÃ¿Ò»Ïî²»¿ÉÒÆ¶¯
+    init();
+    imageGroup = new ImageGroup();
+    imageGroup->creatPreviewPixmap();
+    //QThread* thread = new QThread;   // åˆ›å»ºä¸€ä¸ª QThread å¯¹è±¡
+    //imageGroup = new ImageGroup(path, files);
+    //imageGroup->moveToThread(thread);
+    //QObject::connect(thread, &QThread::started, imageGroup, &ImageGroup::creatPreviewPixmap);  // çº¿ç¨‹å¼€å§‹æ—¶è°ƒç”¨ doWork
+    //QObject::connect(imageGroup, &ImageGroup::finished, thread, &QThread::quit);   // å·¥ä½œå®Œæˆæ—¶é€€å‡ºçº¿ç¨‹
+    //QObject::connect(thread, &QThread::finished, imageGroup, &QObject::deleteLater);  // çº¿ç¨‹ç»“æŸååˆ é™¤ worker å¯¹è±¡
+    //QObject::connect(thread, &QThread::finished, thread, &QObject::deleteLater);  // çº¿ç¨‹ç»“æŸååˆ é™¤çº¿ç¨‹å¯¹è±¡
 
-    path = QString(QDir::currentPath() + "/resource/op/");//±¾µØÍ¼Æ¬Â·¾¶
-    QDir dir(path);
+    //thread->start();  // å¯åŠ¨çº¿ç¨‹ï¼Œä¼šè§¦å‘ QThread::started ä¿¡å·
 
-    //namefilesºÍfilesÎªQStringListÀàĞÍ
-    namefiles << "*.png" << "*.jpg";
-
-    //²éÕÒ±¾µØÍ¼Æ¬Â·¾¶ÏÂµÄpngºó×ººÍjpgºó×ºµÄÍ¼Æ¬Ãû  xxx.png  xxx.jpg
-    files = dir.entryList(namefiles, QDir::Files | QDir::Readable, QDir::Name);
-    QThread* thread = new QThread;   // ´´½¨Ò»¸ö QThread ¶ÔÏó
-    imageGroup = new ImageGroup(path, files);
-    imageGroup->moveToThread(thread);
-    QObject::connect(thread, &QThread::started, imageGroup, &ImageGroup::creatPreviewPixmap);  // Ïß³Ì¿ªÊ¼Ê±µ÷ÓÃ doWork
-    QObject::connect(imageGroup, &ImageGroup::finished, thread, &QThread::quit);   // ¹¤×÷Íê³ÉÊ±ÍË³öÏß³Ì
-    QObject::connect(thread, &QThread::finished, imageGroup, &QObject::deleteLater);  // Ïß³Ì½áÊøºóÉ¾³ı worker ¶ÔÏó
-    QObject::connect(thread, &QThread::finished, thread, &QObject::deleteLater);  // Ïß³Ì½áÊøºóÉ¾³ıÏß³Ì¶ÔÏó
-
-    thread->start();  // Æô¶¯Ïß³Ì£¬»á´¥·¢ QThread::started ĞÅºÅ
-    //for (int i = 0; i < files.size(); ++i) {
-    //    QString imagePath = path + "/" + files.at(i);
-    //    // Òì²½¼ÓÔØÍ¼Æ¬
-    //    QtConcurrent::run([=]() {
-    //        qDebug() << files.at(i);
-    //        QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
-    //        QListWidgetItem* newitem = new QListWidgetItem(icon, "");
-    //        //newitem->setSizeHint(QSize(125, 125));
-    //        newitem->setData(Qt::UserRole, QVariant(imagePath));
-    //        newitem->setText(""); // Èç¹û²»ĞèÒªÏÔÊ¾ÎÄ±¾
-    //        newitem->setTextAlignment(Qt::AlignHCenter);
-    //        //ui->ImagelistWidget->addItem(newitem);
-    //        emit sendImage(newitem);
-    //        });
-    //}
-
-    // Á¬½ÓĞÅºÅµ½²Û£¬ÒÔÌí¼ÓÍ¼±êµ½ÁĞ±í
+    // è¿æ¥ä¿¡å·åˆ°æ§½ï¼Œä»¥æ·»åŠ å›¾æ ‡åˆ°åˆ—è¡¨
     connect(imageGroup, &ImageGroup::sendImage, this, &MainWidget::addIconToList, Qt::QueuedConnection);
-    //connect(this, &MainWidget::sendImage, this, &MainWidget::addIconToList, Qt::QueuedConnection);
 
-    //ÑùÊ½±íÉè¼Æ
-    //ui->ImagelistWidget->setStyleSheet("QListWidget{background-color: white;border:none; color:black;outline:0px; }"
+    //æ ·å¼è¡¨è®¾è®¡
     ui->ImagelistWidget->setStyleSheet(
         "QListWidget::Item{padding-left:0px;padding-top:5px; padding-bottom:4px;color:black}"
         "QListWidget::Item:hover{background:lightgreen; color:red;}"
@@ -75,31 +40,40 @@ MainWidget::MainWidget(QWidget *parent)
     connect(ui->ImagelistWidget, &QListWidget::itemClicked, this, &MainWidget::previewImage);
 }
 
+void MainWidget::init()
+{
+    ui->setupUi(this);
+    this->setWindowIcon(QIcon(":/resource/icon.png"));
+    // è®¾ç½® QTextBrowser çš„é»˜è®¤å­—ä½“
+    QFont font("Microsoft YaHei", 10);  // å­—ä½“åå’Œå­—ä½“å¤§å°
+    ui->ImageSizeInfo->setFont(font);
+    ui->ImageNameInfo->setFont(font);
+    //è®¾ç½®å›¾ç‰‡åˆ—è¡¨
+    ui->ImagelistWidget->setIconSize(QSize(125, 125));//è®¾ç½®å•ä¸ªIconå¤§å°
+    ui->ImagelistWidget->setViewMode(QListView::IconMode);//è®¾ç½®æ˜¾ç¤ºæ¨¡å¼
+    ui->ImagelistWidget->setFlow(QListView::LeftToRight);//ä»å·¦åˆ°å³
+    ui->ImagelistWidget->setResizeMode(QListView::Adjust);//å¤§å°è‡ªé€‚åº”
+    ui->ImagelistWidget->setMovement(QListView::Static);//è®¾ç½®åˆ—è¡¨æ¯ä¸€é¡¹ä¸å¯ç§»åŠ¨
+    //è®¾ç½®æ¡Œé¢å›¾ç‰‡å¡«å……æ¨¡å¼
+    ui->wallpaperMode->setFont(font);
+    ui->wallpaperMode->addItem("æ‹‰ä¼¸", QVariant("stretch"));
+    ui->wallpaperMode->addItem("é€‚åˆ", QVariant("fit"));
+    ui->wallpaperMode->addItem("å¡«å……", QVariant("fill"));
+    ui->wallpaperMode->addItem("å±…ä¸­", QVariant("center"));
+    ui->wallpaperMode->addItem("å¹³é“º", QVariant("tile"));
+    //connect(ui->wallpaperMode, SIGNAL(currentIndexChanged(int)), this, SLOT(onComboBoxChanged()));
+}
+
 void MainWidget::addIconToList(QListWidgetItem* newitem) {
     ui->ImagelistWidget->addItem(newitem);
 }
 
-QPixmap MainWidget::createRoundedPixmap(const QPixmap& source, int radius) {
-    if (source.isNull()) return QPixmap();  // ·µ»Ø¿ÕµÄ QPixmap Èç¹ûÔ´ÊÇ¿ÕµÄ
-
-    QPixmap pixmap(source.size());
-    pixmap.fill(Qt::transparent);  // Ê¹ÓÃÍ¸Ã÷ÑÕÉ«Ìî³ä
-
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing, true);  // ¿¹¾â³İ
-    painter.setBrush(QBrush(source));  // ÉèÖÃ»­Ë¢ÎªÔ­Í¼
-    painter.setPen(Qt::NoPen);  // ÉèÖÃÎŞ±ß¿ò»­±Ê£¬Ïû³ı±ß¿ò
-
-    // »æÖÆÔ²½Ç¾ØĞÎ£¬Ìî³äÇøÓòÎªÕû¸öÍ¼Ïñ
-    painter.drawRoundedRect(pixmap.rect(), radius, radius);
-
-    return pixmap;
-}
 
 void MainWidget::updateImageList() {
 
 }
-//²é¿´Í¼Æ¬
+
+//æŸ¥çœ‹å›¾ç‰‡
 void MainWidget::enlargeImage(QListWidgetItem* item) {
     QString filepath = item->data(Qt::UserRole).toString();
     //desktopWidget->SetPixmap(filepath);
@@ -108,11 +82,11 @@ void MainWidget::enlargeImage(QListWidgetItem* item) {
     showImageWidget->show();  
 }
 
-//Ô¤ÀÀÍ¼Æ¬
+//é¢„è§ˆå›¾ç‰‡
 void MainWidget::previewImage(QListWidgetItem* item) {
     selectImage = item->data(Qt::UserRole).toString();
     QPixmap Image = QPixmap(selectImage);
-    QString Imagesize = QString("%1 ¡Á %2").arg(Image.width()).arg(Image.height());
+    QString Imagesize = QString("%1 Ã— %2").arg(Image.width()).arg(Image.height());
     Image = Image.scaled(ui->ImagePreview->width(), ui->ImagePreview->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     ui->ImagePreview->setPixmap(Image);
     ui->ImageSizeInfo->setPlainText(Imagesize);
@@ -127,10 +101,9 @@ MainWidget::~MainWidget()
 void MainWidget::on_ImageListBnt_clicked() {
 	//ui->stackedWidget->setCurrentIndex(0);
     QStringList file_paths = QFileDialog::getOpenFileNames(this, tr("Image Path"), "Data\\", tr("Image Files(*png *jpg *tif);"));
-
-    //Ìí¼ÓÍ¼Æ¬
+    //æ·»åŠ å›¾ç‰‡
     imageGroup->addImage(file_paths);
-    //imageGroup->creatPreviewPixmap();
+    imageGroup->creatPreviewPixmap();
 }
 
 void MainWidget::on_SettingBnt_clicked() {
@@ -157,7 +130,7 @@ void MainWidget::closeEvent(QCloseEvent* event)
     if (rolewidget) {
         desktopWidget->close();
     }
-    //MainWidget::closeEvent(event);  // µ÷ÓÃ»ùÀàµÄ¹Ø±ÕÊÂ¼ş´¦Àí
+    //MainWidget::closeEvent(event);  // è°ƒç”¨åŸºç±»çš„å…³é—­äº‹ä»¶å¤„ç†
 }
 void MainWidget::paintEvent(QPaintEvent* event) {
     QPainter painter(this);

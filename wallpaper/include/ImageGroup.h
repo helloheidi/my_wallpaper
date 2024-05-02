@@ -7,22 +7,23 @@ class ImageGroup : public QObject
 {
 	Q_OBJECT
 public:
-	ImageGroup(const QString& path, const QStringList& img_names, QObject* parent = nullptr);
+	ImageGroup(QObject* parent = nullptr);
 	~ImageGroup();
-	//Ìí¼ÓÍ¼Æ¬Â·¾¶
+	//æ·»åŠ å›¾ç‰‡è·¯å¾„
 	bool addImage(const QStringList& img_names);
 	const QStringList& GetAllImage() { return all_images_; }
 	const QStringList& GetNewImage() { return new_images_; }
 
 private:
-	//Í¼Æ¬Â·¾¶
+	//å›¾ç‰‡è·¯å¾„
 	QString path_;
-	//ËùÓĞÍ¼Æ¬Êı×é
+	//æ‰€æœ‰å›¾ç‰‡æ•°ç»„
 	QStringList all_images_;
-	//ĞÂÔöÍ¼Æ¬Êı×é
+	QStringList namefiles, files;
+	//æ–°å¢å›¾ç‰‡æ•°ç»„
 	QStringList new_images_;
 	
-	//ÎªËõÂÔÍ¼Ìí¼ÓÔ²½Ç
+	//ä¸ºç¼©ç•¥å›¾æ·»åŠ åœ†è§’
 	QPixmap createRoundedPixmap(const QPixmap& source, int radius);
 
 signals:
@@ -30,7 +31,7 @@ signals:
 	void finished();
 
 public slots:
-	//Éú³ÉËõÂÔÍ¼
+	//ç”Ÿæˆç¼©ç•¥å›¾
 	void creatPreviewPixmap();
 };
 
