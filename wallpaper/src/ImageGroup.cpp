@@ -12,7 +12,7 @@
 ImageGroup::ImageGroup(QObject* parent)
     : QObject(parent)
 {
-    QString path1 = QString(QDir::currentPath() + "/resource/mywallpaper/");//添加本地文件
+    QString path1 = QString(QDir::currentPath() + "/resource/mywallpaper/");//本地图片路径
     //QDirIterator it(path1, QStringList() << "*.png" << "*.jpg" << "*.jpeg", QDir::Files, QDirIterator::Subdirectories);
     QDirIterator it(path1, QStringList() << "*.gif", QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {

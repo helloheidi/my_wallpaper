@@ -105,7 +105,6 @@
     <ClCompile Include="src\desktopwidget.cpp" />
     <ClCompile Include="src\ImageGroup.cpp" />
     <ClCompile Include="src\imageview.cpp" />
-    <ClCompile Include="src\listwidgetitem.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mainwidget.cpp" />
     <ClCompile Include="src\rolewidget.cpp" />
@@ -130,9 +129,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="Resource.qrc" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="include\listwidgetitem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

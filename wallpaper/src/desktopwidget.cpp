@@ -14,7 +14,7 @@ DesktopWidget::DesktopWidget(QWidget* parent)
     : QWidget(parent)
     , bklabel(new QLabel(this))
 {
-    imageFormats = { "jpg", "jpeg", "png", "bmp", "gif" };//设置可加载格式
+    imageFormats = { "jpg", "jpeg", "png", "bmp", "gif" };
     videoFormats = { "mp4", "avi", "mov", "mkv", "flv", "wmv" };
     //setWindowFlags(Qt::FramelessWindowHint);
     //setAttribute(Qt::WA_TranslucentBackground);
