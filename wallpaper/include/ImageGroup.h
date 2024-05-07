@@ -26,9 +26,11 @@ private:
 	
 	//为缩略图添加圆角
 	QPixmap createRoundedPixmap(const QPixmap& source, int radius);
+	void processImages(QStringList& fileNames);
+	void createThumbnail(const QString& filePath, const QString& baseName, const QString& dirPath);
 
 signals:
-	void sendImage(QListWidgetItem* item, ListWidgetItem* itemWidget);
+	void sendImage(QString filePath);
 	void finished();
 
 public slots:

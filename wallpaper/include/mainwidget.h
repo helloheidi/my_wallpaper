@@ -25,6 +25,7 @@ private:
 	DesktopWidget* desktopWidget;
 	RoleWidget* rolewidget;
 
+	QString selectImage_pre;//设置选中的图片预览图的路径
 	QString selectImage_;//设置选中的图片的路径
 	int imageMode_;//设置图片填充模式
 
@@ -33,7 +34,7 @@ protected:
 	void paintEvent(QPaintEvent* event);
 
 public slots:
-	void addIconToList(QListWidgetItem* item, ListWidgetItem* itemWidget);
+	void addIconToList(QString filePath);
 
 private slots:
 	void updateImageMode(int imageMode);//更新桌面图片填充模式

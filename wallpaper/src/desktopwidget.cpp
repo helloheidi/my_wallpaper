@@ -6,6 +6,7 @@
 #include <qvector.h>
 #include <qdebug.h>
 #include <qdir.h>
+#include <qpainter.h>
 
 QSet<QString> DesktopWidget::imageFormats;
 QSet<QString> DesktopWidget::videoFormats;
@@ -14,13 +15,13 @@ DesktopWidget::DesktopWidget(QWidget* parent)
     : QWidget(parent)
     , bklabel(new QLabel(this))
 {
-    imageFormats = { "jpg", "jpeg", "png", "bmp", "gif" };
+    imageFormats = { "jpg", "jpeg", "png", "bmp", "gif" };//添加支持的格式
     videoFormats = { "mp4", "avi", "mov", "mkv", "flv", "wmv" };
     //setWindowFlags(Qt::FramelessWindowHint);
     //setAttribute(Qt::WA_TranslucentBackground);
-    //QHBoxLayout* layout = new QHBoxLayout(this);
-    //layout->setMargin(0);
-    //layout->addWidget(bklabel);
+    QHBoxLayout* layout = new QHBoxLayout(this);
+    layout->setMargin(0);
+    layout->addWidget(bklabel);
     // 获取主屏幕
     QScreen* screen = QApplication::primaryScreen();
     // 获取屏幕分辨率
@@ -29,20 +30,119 @@ DesktopWidget::DesktopWidget(QWidget* parent)
     screenHeight = screenGeometry.height();
     SetBackground((HWND)this->winId());
 
-    
+    // 创建播放列表并添加视频
+    playlist = new QMediaPlaylist();
+    playlist->setPlaybackMode(QMediaPlaylist::Loop);  // 设置循环播放模式
     videoPlayer = new QMediaPlayer(this);
     videoWidget = new QVideoWidget(this);
     videoWidget->setGeometry(0, 0, screenWidth, screenHeight);
     videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
-    //videoWidget->setWindowState(Qt::WindowMaximized);
-    //videoWidget->setWindowFlags(Qt::FramelessWindowHint);
     
     videoPlayer->setVideoOutput(videoWidget);
-    connect(videoPlayer, &QMediaPlayer::mediaStatusChanged, this, &DesktopWidget::onMediaStatusChanged);
+    //connect(videoPlayer, &QMediaPlayer::mediaStatusChanged, this, &DesktopWidget::onMediaStatusChanged);
+    layout->addWidget(videoWidget);
 }
 
 DesktopWidget::~DesktopWidget()
 {}
+
+
+//void DesktopWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+//    if (status == QMediaPlayer::LoadedMedia) {
+//        videoPlayer->play();
+//        this->showFullScreen();
+//    }
+//}
+
+void DesktopWidget::UpdateWallpaper() {
+    if (filePath_.isEmpty()) {
+        return;
+    }
+    QString suffix = QFileInfo(filePath_).suffix().toLower();
+    if (imageFormats.contains(suffix)) {
+        
+        
+        showImage(filePath_);
+        qDebug() << "The file is an image." << filePath_;
+    }
+    else if (videoFormats.contains(suffix)) {
+          
+        //videoWidget->show();
+        showVideo(filePath_);
+        qDebug() << "The file is a video." << filePath_;
+    }
+    else {
+        qDebug() << "Unknown file type.";
+    }
+}
+
+void DesktopWidget::showVideo(QString filePath) {
+    playlist->clear();
+    playlist->setCurrentIndex(0);
+    playlist->addMedia(QUrl::fromLocalFile(filePath));
+    videoPlayer->setPlaylist(playlist);  // 设置播放列表
+    //videoPlayer->setMedia(QUrl::fromLocalFile(filePath));
+    connect(videoPlayer, &QMediaPlayer::mediaStatusChanged, this, [&](QMediaPlayer::MediaStatus status) {
+        //if (status == QMediaPlayer::BufferedMedia) {  // 确保媒体已缓冲
+        if (status == QMediaPlayer::LoadedMedia) {
+            videoPlayer->play();
+            bklabel->hide();
+            this->showFullScreen();            
+        }
+        });
+}
+
+
+void DesktopWidget::showImage(QString filePath) {
+    if (QPixmap(filePath).isNull()) {
+        return;
+    }
+    QPixmap bkPixmap;
+	bool success = bkPixmap.load(filePath);
+    if (!success) {
+        qDebug() << "image load faild.";
+    }
+
+    switch (imageMode_) {
+    case 0://填充
+        {
+            QSize scaledSize = bkPixmap.size();
+            scaledSize.scale(screenWidth, screenHeight, Qt::KeepAspectRatioByExpanding);
+            bkPixmap = bkPixmap.scaled(scaledSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+            qDebug() << "填充";
+        }
+        break;
+    case 1://适应
+        bkPixmap = bkPixmap.scaled(screenWidth, screenHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        qDebug() << "适应";
+        break;
+    case 2://拉伸       
+        bkPixmap = bkPixmap.scaled(screenWidth, screenHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        qDebug() << "拉伸";
+        break;
+    case 3://居中
+        bklabel->setAlignment(Qt::AlignCenter);
+        qDebug() << "居中";
+        break;
+    case 4://平铺
+        {
+            QPalette palette;
+            palette.setBrush(bklabel->backgroundRole(), QBrush(bkPixmap));
+            bklabel->setAutoFillBackground(true);
+            bklabel->setPalette(palette);
+            bklabel->setPixmap(QPixmap()); // 清除可能存在的图片设置
+            this->showFullScreen();
+            qDebug() << "平铺";
+            return; // Skip setting pixmap directly since it's set via palette
+        }
+    }
+    bklabel->show();
+    videoPlayer->stop();
+    videoPlayer->setMedia(QMediaContent());  // 清除当前媒体
+    bklabel->setPixmap(bkPixmap);
+    bklabel->setAutoFillBackground(false); // 清除可能存在的背景色设置
+	this->showFullScreen();
+}
 
 //获取背景窗体句柄"D:/Electronic_2/MyProject/wallpaper/wallpaper/resource/video/心海.mp4"
 HWND DesktopWidget::GetBackground() {
@@ -86,75 +186,9 @@ HWND DesktopWidget::GetBackground() {
 void DesktopWidget::SetBackground(HWND child) {
     SetParent(child, GetBackground()); // 把视频窗口设置为Program Manager的儿子
 }
-
-void DesktopWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
-    if (status == QMediaPlayer::LoadedMedia) {
-        videoPlayer->play();
-        this->showFullScreen();
-    }
-}
-
-void DesktopWidget::UpdateWallpaper() {
-    if (filePath_.isEmpty()) {
-        return;
-    }
-    QString suffix = QFileInfo(filePath_).suffix().toLower();
-    if (imageFormats.contains(suffix)) {
-        qDebug() << "The file is an image.";
-    }
-    else if (videoFormats.contains(suffix)) {
-        qDebug() << "The file is a video.";
-    }
-    else {
-        qDebug() << "Unknown file type.";
-    }
-}
-
-void DesktopWidget::showVideo(QString filePath) {
-    videoPlayer->setMedia(QUrl::fromLocalFile(filePath));
-}
-
-void DesktopWidget::showImage(QString filePath) {
-    if (QPixmap(filePath_).isNull()) {
-        return;
-    }
-    QPixmap bkPixmap;
-	bkPixmap.load(filePath);
-
-    switch (imageMode_) {
-    case 0://填充
-        {
-            QSize scaledSize = bkPixmap.size();
-            scaledSize.scale(screenWidth, screenHeight, Qt::KeepAspectRatioByExpanding);
-            bkPixmap = bkPixmap.scaled(scaledSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-            qDebug() << "填充";
-        }
-        break;
-    case 1://适应
-        bkPixmap = bkPixmap.scaled(screenWidth, screenHeight, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        qDebug() << "适应";
-        break;
-    case 2://拉伸       
-        bkPixmap = bkPixmap.scaled(screenWidth, screenHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        qDebug() << "拉伸";
-        break;
-    case 3://居中
-        bklabel->setAlignment(Qt::AlignCenter);
-        qDebug() << "居中";
-        break;
-    case 4://平铺
-        {
-            QPalette palette;
-            palette.setBrush(bklabel->backgroundRole(), QBrush(bkPixmap));
-            bklabel->setAutoFillBackground(true);
-            bklabel->setPalette(palette);
-            bklabel->setPixmap(QPixmap()); // 清除可能存在的图片设置
-            this->showFullScreen();
-            qDebug() << "平铺";
-            return; // Skip setting pixmap directly since it's set via palette
-        }
-    }
-    bklabel->setPixmap(bkPixmap);
-    bklabel->setAutoFillBackground(false); // 清除可能存在的背景色设置
-	this->showFullScreen();
+void DesktopWidget::resizeEvent(QResizeEvent* event) {
+    QWidget::resizeEvent(event);  // 调用基类实现
+    // 更新 bklabel 的大小来匹配新的窗口尺寸
+    bklabel->resize(this->size());
+    // 如果需要，重新设置内容的缩放或位置
 }

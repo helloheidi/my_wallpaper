@@ -17,11 +17,14 @@ MainWidget::MainWidget(QWidget *parent)
 {
     init();
     imageGroup = new ImageGroup();
+    // 连接信号到槽，以添加图标到列表
+    connect(imageGroup, &ImageGroup::sendImage, this, &MainWidget::addIconToList, Qt::QueuedConnection);
+
     imageGroup->creatPreviewPixmap();
     //设置默认桌面为图片列表第一张模式为填充
-    selectImage_ = imageGroup->GetAllImage().at(0);
-    desktopWidget->SetfilePath(selectImage_);
-    desktopWidget->SetimageMode(imageMode_);
+    //selectImage_ = imageGroup->GetAllImage().at(0);
+    //desktopWidget->SetfilePath(selectImage_);
+    //desktopWidget->SetimageMode(imageMode_);
     //desktopWidget->UpdateWallpaper();
     //QThread* thread = new QThread;   // 创建一个 QThread 对象
     //imageGroup = new ImageGroup(path, files);
@@ -33,15 +36,57 @@ MainWidget::MainWidget(QWidget *parent)
 
     //thread->start();  // 启动线程，会触发 QThread::started 信号
 
-    // 连接信号到槽，以添加图标到列表
-    connect(imageGroup, &ImageGroup::sendImage, this, &MainWidget::addIconToList, Qt::QueuedConnection);
-
     //样式表设计
     ui->ImagelistWidget->setStyleSheet(
-        "QListWidget::Item{padding-left:0px;padding-top:5px; padding-bottom:4px;color:black}"
-        "QListWidget::Item:hover{background:lightgreen; color:red;}"
+        "QListWidget::item {"
+        "   margin: 2px;"  // 设置上下左右的间距为10px
+        "}"
+
+        //"QListWidget::Item{padding-left:0px;padding-top:5px; padding-bottom:4px;color:black}"
+        "QListWidget::Item:hover{background:lightgray; color:red;}"
         "QListWidget::item:selected{background:lightgray; color:green; }"
     );
+    ui->ImagelistWidget->setStyleSheet(R"(
+QScrollBar:vertical {
+    border: 2px solid grey;
+    background: #f1f1f1;
+    width: 15px;
+    margin: 22px 0 22px 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #888; /* 滑块的颜色 */
+    min-height: 20px;
+}
+
+QScrollBar::add-line:vertical {
+    border: 2px solid grey;
+    background: #32CC99;
+    height: 20px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical {
+    border: 2px solid grey;
+    background: #32CC99;
+    height: 20px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    border: 2px solid grey;
+    width: 3px;
+    height: 3px;
+    background: white;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+)");
+
     connect(ui->ImagelistWidget, &QListWidget::itemDoubleClicked, this, &MainWidget::enlargeImage);
     connect(ui->ImagelistWidget, &QListWidget::itemClicked, this, &MainWidget::previewImage);
 }
@@ -71,7 +116,21 @@ void MainWidget::init()
     connect(ui->wallpaperMode, SIGNAL(currentIndexChanged(int)), this, SLOT(updateImageMode(int)));
 }
 
-void MainWidget::addIconToList(QListWidgetItem* newitem, ListWidgetItem* itemWidget) {
+void MainWidget::addIconToList(QString filePath) {    
+    QFileInfo fileInfo(filePath);
+    QString baseName = fileInfo.baseName();
+    QString dirPath = fileInfo.dir().path();
+    QString thumbnailPath = dirPath + "/" + baseName + "_preview.gif";
+    if (!QFile::exists(thumbnailPath)) {
+        thumbnailPath = dirPath + "/" + baseName + "_preview.jpg";
+    }
+    qDebug() << "basename:" << baseName << "dirpath:" << dirPath << "thumbnail" << thumbnailPath;
+    QListWidgetItem* newitem = new QListWidgetItem();
+    ListWidgetItem* itemWidget = new ListWidgetItem(thumbnailPath);
+    newitem->setSizeHint(itemWidget->sizeHint());
+    newitem->setData(Qt::UserRole, QVariant(thumbnailPath));
+    newitem->setData(Qt::UserRole + 1, QVariant(filePath));
+    newitem->setText(""); // 如果不需要显示文本
     ui->ImagelistWidget->addItem(newitem);
     ui->ImagelistWidget->setItemWidget(newitem, itemWidget);
 }
@@ -94,13 +153,27 @@ void MainWidget::enlargeImage(QListWidgetItem* item) {
 
 //预览图片
 void MainWidget::previewImage(QListWidgetItem* item) {
-    selectImage_ = item->data(Qt::UserRole).toString();
-    QPixmap Image = QPixmap(selectImage_);
-    QString Imagesize = QString("%1 × %2").arg(Image.width()).arg(Image.height());
-    Image = Image.scaled(ui->ImagePreview->width(), ui->ImagePreview->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    ui->ImagePreview->setPixmap(Image);
-    ui->ImageSizeInfo->setPlainText(Imagesize);
-    ui->ImageNameInfo->setPlainText(selectImage_.section('/', -1));
+    selectImage_pre = item->data(Qt::UserRole).toString();
+    selectImage_ = item->data(Qt::UserRole + 1).toString();
+    //QPixmap Image = QPixmap(selectImage_);
+
+    QMovie* movie = new QMovie(selectImage_pre);
+    ui->ImagePreview->setScaledContents(true);
+    if (movie->isValid()) {
+        ui->ImagePreview->setMovie(movie);
+        movie->start();
+    }
+    else {
+        // 如果不是有效的动图，就当作普通图像处理
+        QPixmap pixmap(selectImage_pre);
+        ui->ImagePreview->setPixmap(pixmap);
+    }
+    //QString Imagesize = QString("%1 × %2").arg(Image.width()).arg(Image.height());
+    //Image = Image.scaled(ui->ImagePreview->width(), ui->ImagePreview->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+    //ui->ImagePreview->setPixmap(Image);
+    //ui->ImageSizeInfo->setPlainText(Imagesize);
+    ui->ImageNameInfo->setPlainText(selectImage_pre.section('/', -1));
 }
 
 MainWidget::~MainWidget()
@@ -110,10 +183,9 @@ MainWidget::~MainWidget()
 
 void MainWidget::on_ImageListBnt_clicked() {
 	//ui->stackedWidget->setCurrentIndex(0);
-    QStringList file_paths = QFileDialog::getOpenFileNames(this, tr("Image Path"), "Data\\", tr("Image Files(*png *jpg *tif);"));
+    QStringList file_paths = QFileDialog::getOpenFileNames(this, tr("Image Path"), "Data\\", tr("Image Files(*.png *.jpg *.jpeg *.mp4);"));
     //添加图片
     imageGroup->addImage(file_paths);
-    imageGroup->creatPreviewPixmap();
 }
 
 void MainWidget::on_SettingBnt_clicked() {

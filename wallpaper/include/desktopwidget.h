@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QVideoWidget>
 #include <QMediaPlayer>
+#include <QMediaPlaylist>
 class DesktopWidget  : public QWidget
 {
 	Q_OBJECT
@@ -30,13 +31,17 @@ private:
 	int imageMode_;
 	QString filePath_;
 
+	QMediaPlaylist* playlist;
 	QMediaPlayer* videoPlayer;
 	QVideoWidget* videoWidget;
+	QWidget* imageWidget;
 	
 	void showImage(QString filePath);
 	void showVideo(QString filePath);
 
+	void resizeEvent(QResizeEvent* event);
+
 public slots:
 	void UpdateWallpaper();
-	void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
+	//void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
 };

@@ -12,13 +12,36 @@
 ImageGroup::ImageGroup(QObject* parent)
     : QObject(parent)
 {
-    QString path1 = QString(QDir::currentPath() + "/resource/mywallpaper/");
-    //QDirIterator it(path1, QStringList() << "*.png" << "*.jpg" << "*.jpeg", QDir::Files, QDirIterator::Subdirectories);
-    QDirIterator it(path1, QStringList() << "*.gif", QDir::Files, QDirIterator::Subdirectories);
+    /*QString path1 = QString(QDir::currentPath() + "/resource/mywallpaper/");
+    QDirIterator it(path1, QStringList() << "*.png" << "*.jpg" << "*.jpeg", QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         new_images_ << it.next();
+    }*/
+    //all_images_.append(new_images_);
+    QFile configFile("resource/config.txt");
+    if (!configFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
+        qDebug() << "Unable to open config file for reading.";
+        return;
     }
-    all_images_.append(new_images_);
+    QTextStream in(&configFile);
+    QString line;
+
+    while (in.readLineInto(&line)) {
+        qDebug() << line;
+        QFileInfo checkFile(line);
+        if (checkFile.exists() && checkFile.isFile()) {
+            // 检查缩略图是否存在
+            QString previewPath_jpg = checkFile.absoluteDir().absolutePath() + "/" + checkFile.completeBaseName() + "_preview.jpg";
+            QString previewPath_gif = checkFile.absoluteDir().absolutePath() + "/" + checkFile.completeBaseName() + "_preview.gif";
+            if (!QFile::exists(previewPath_jpg) && !QFile::exists(previewPath_gif)) {
+                // 如果缩略图不存在，则生成
+                createThumbnail(line, checkFile.baseName(), checkFile.dir().path());
+            }
+            new_images_.append(line);
+            all_images_.append(line);
+        }        
+    }
+    configFile.close();   
 }
 
 ImageGroup::~ImageGroup()
@@ -42,43 +65,102 @@ bool ImageGroup::addImage(const QStringList& img_paths)
         }
     }
     new_images_ = filteredNewPaths;
+    processImages(new_images_);
+    //creatPreviewPixmap();
     //将新增图片添加至全部图片数组
     all_images_.reserve(all_images_.size() + new_images_.size());
     all_images_.append(new_images_);
     return true;
 }
+
+void ImageGroup::processImages(QStringList& fileNames) {
+    QFile configFile("resource/config.txt");
+    if (!configFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        qDebug() << "Unable to open config file for writing.";
+        return;
+    }
+    QTextStream out(&configFile);
+
+    foreach(const QString & filePath, fileNames) {
+        QFileInfo fileInfo(filePath);
+        QString baseName = fileInfo.baseName();
+        QString dirPath = "resource/data/" + baseName;
+
+        // 创建目录
+        if (!QDir().mkpath(dirPath)) {  // 使用mkpath创建文件夹
+            qDebug() << "Failed to create directory:" << dirPath;
+            continue;  // 如果创建失败，则跳过这个文件
+        }
+
+        // 复制文件
+        QString newFilePath = dirPath + "/" + fileInfo.fileName();
+        bool success = QFile::copy(filePath, newFilePath);
+        if (!success) {
+            continue;  // 如果拷贝失败，则跳过这个文件
+        }
+        // 创建缩略图
+        createThumbnail(newFilePath, baseName, dirPath);
+        // 保存图片路径到配置文件
+        out << newFilePath << "\n";
+    }
+    configFile.close();
+}
+
+void ImageGroup::createThumbnail(const QString& filePath, const QString& baseName, const QString& dirPath) {
+    //线程池创建缩略图
+    QtConcurrent::run([=]() {
+        QImage image(filePath);
+        if (image.isNull()) {
+            return;  // 如果图片加载失败，返回
+        }
+
+        const QSize targetSize(320, 320);
+        qreal scale = qMax(
+            static_cast<qreal>(targetSize.width()) / image.width(),
+            static_cast<qreal>(targetSize.height()) / image.height()
+        );
+
+        QImage scaled = image.scaled(
+            image.width() * scale,
+            image.height() * scale,
+            Qt::KeepAspectRatio,
+            Qt::SmoothTransformation
+        );
+
+        int x = (scaled.width() - targetSize.width()) / 2;
+        int y = (scaled.height() - targetSize.height()) / 2;
+
+        QImage cropped = scaled.copy(x, y, targetSize.width(), targetSize.height());
+        cropped.save(dirPath + "/" + baseName + "_preview.jpg");
+
+        emit sendImage(filePath);  // 确保信号与槽通过 Qt::QueuedConnection 连接
+        });
+}
+
 //生成缩略图并添加item
 void ImageGroup::creatPreviewPixmap()
 {
-    //for (int i = 0; i < all_images_.size(); i++) {
-    //    qDebug() << all_images_.at(i);
-    //    QString imagePath = path_ + "/" + all_images_.at(i);
-    //    QPixmap PreviewPixmap = QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    //    QIcon icon(createRoundedPixmap(PreviewPixmap, 5));
-    //    QListWidgetItem* newitem = new QListWidgetItem(icon, "");
-    //    newitem->setSizeHint(QSize(PreviewPixmap.width(), PreviewPixmap.height()));
-    //    newitem->setData(Qt::UserRole, QVariant(imagePath));
-    //    newitem->setText(""); // 不需要显示文本
-    //    newitem->setTextAlignment(Qt::AlignHCenter);
-    //    emit sendImage(newitem);
-    //}
-    //emit finished();
-     for (int i = 0; i < new_images_.size(); ++i) {
-        QString imagePath = new_images_.at(i);
-        // 异步加载图片
-        QtConcurrent::run([=]() {
-            qDebug() << new_images_.at(i);
-            //QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
-            QListWidgetItem* newitem = new QListWidgetItem;
-            ListWidgetItem* itemWidget = new ListWidgetItem(imagePath);
-            //newitem->setSizeHint(QSize(125, 125));
-            newitem->setData(Qt::UserRole, QVariant(imagePath));
-            newitem->setText(""); // 如果不需要显示文本
-            newitem->setTextAlignment(Qt::AlignHCenter);
-            //ui->ImagelistWidget->addItem(newitem);
-            emit sendImage(newitem, itemWidget);
-            });
+    for(QString & filePath : new_images_) {
+        qDebug() << "fucking send" << filePath;
+        emit sendImage(filePath);
     }
+    //emit finished();
+    // for (int i = 0; i < new_images_.size(); ++i) {
+    //    QString imagePath = new_images_.at(i);
+    //    // 异步加载图片
+    //    QtConcurrent::run([=]() {
+    //        qDebug() << new_images_.at(i);
+    //        //QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
+    //        QListWidgetItem* newitem = new QListWidgetItem;
+    //        ListWidgetItem* itemWidget = new ListWidgetItem(imagePath);
+    //        //newitem->setSizeHint(QSize(125, 125));
+    //        newitem->setData(Qt::UserRole, QVariant(imagePath));
+    //        newitem->setText(""); // 如果不需要显示文本
+    //        newitem->setTextAlignment(Qt::AlignHCenter);
+    //        //ui->ImagelistWidget->addItem(newitem);
+    //        emit sendImage(newitem, itemWidget);
+    //        });
+    //}
 }
 
 //为缩略图添加圆角

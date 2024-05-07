@@ -1,26 +1,35 @@
 #include "include/listwidgetitem.h"
-#include <qlabel.h>
-#include <qmovie.h>
+
 #include <qbitmap.h>
 #include <qpainter.h>
+#include <QVBoxLayout>
 
 ListWidgetItem::ListWidgetItem(const QString& filePath, QWidget* parent) : QWidget(parent) {
-    QLabel* label = new QLabel;
-    QMovie* movie = new QMovie(filePath);
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setMargin(5);  // 设置边距为0
+    layout->setSpacing(5); // 设置间隔为0
+    label = new QLabel;
+    movie = new QMovie(filePath);
+    label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    label->setScaledContents(true);
     label->setMovie(movie);
+    label->setFixedSize(150,150);
     movie->start();
 
-    QBitmap bitmap(movie->currentPixmap().size());
-    bitmap.fill(Qt::color0);  // 初始化为全透明
-
-    QPainter painter(&bitmap);
-    painter.setRenderHint(QPainter::Antialiasing, true); // 开启抗锯齿
-    QPainterPath path;
-    path.addRoundedRect(0, 0, bitmap.width(), bitmap.height(), 50, 50);  // 注意这里直接使用控件的宽度和高度
-
-    painter.fillPath(path, Qt::color1);  // 使用不透明的颜色填充路径
-    label->setMask(bitmap);  // 应用遮罩
+    if (movie->isValid()) {
+        label->setMovie(movie);
+        movie->start();
+    }
+    else {
+        // 如果不是有效的动图，就当作普通图像处理
+        QPixmap pixmap(filePath);
+        label->setPixmap(pixmap);
+    }
+    layout->addWidget(label);
+    layout->setAlignment(Qt::AlignCenter);
+    this->setLayout(layout);
 }
+
 
 ListWidgetItem::~ListWidgetItem()
 {}
