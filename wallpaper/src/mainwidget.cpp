@@ -17,84 +17,62 @@ MainWidget::MainWidget(QWidget *parent)
 {
     init();
     imageGroup = new ImageGroup();
-    // 连接信号到槽，以添加图标到列表
-    connect(imageGroup, &ImageGroup::sendImage, this, &MainWidget::addIconToList, Qt::QueuedConnection);
 
-    imageGroup->creatPreviewPixmap();
-    //设置默认桌面为图片列表第一张模式为填充
-    //selectImage_ = imageGroup->GetAllImage().at(0);
-    //desktopWidget->SetfilePath(selectImage_);
-    //desktopWidget->SetimageMode(imageMode_);
-    //desktopWidget->UpdateWallpaper();
-    //QThread* thread = new QThread;   // 创建一个 QThread 对象
-    //imageGroup = new ImageGroup(path, files);
-    //imageGroup->moveToThread(thread);
-    //QObject::connect(thread, &QThread::started, imageGroup, &ImageGroup::creatPreviewPixmap);  // 线程开始时调用 doWork
-    //QObject::connect(imageGroup, &ImageGroup::finished, thread, &QThread::quit);   // 工作完成时退出线程
-    //QObject::connect(thread, &QThread::finished, imageGroup, &QObject::deleteLater);  // 线程结束后删除 worker 对象
-    //QObject::connect(thread, &QThread::finished, thread, &QObject::deleteLater);  // 线程结束后删除线程对象
-
-    //thread->start();  // 启动线程，会触发 QThread::started 信号
-
-    //样式表设计
-    ui->ImagelistWidget->setStyleSheet(
-        "QListWidget::item {"
-        "   margin: 2px;"  // 设置上下左右的间距为10px
-        "}"
-
-        //"QListWidget::Item{padding-left:0px;padding-top:5px; padding-bottom:4px;color:black}"
-        "QListWidget::Item:hover{background:lightgray; color:red;}"
-        "QListWidget::item:selected{background:lightgray; color:green; }"
-    );
+    //样式表设计美化界面
     ui->ImagelistWidget->setStyleSheet(R"(
-QScrollBar:vertical {
-    border: 2px solid grey;
-    background: #f1f1f1;
-    width: 15px;
-    margin: 22px 0 22px 0;
-}
+        QListWidget::Item:hover{background:lightblue;}
+        QListWidget::item:selected{background:lightgreen;}
+        QScrollBar:vertical {
+            border: 2px solid grey;
+            background: #f1f1f1;
+            width: 15px;
+            margin: 22px 0 22px 0;
+        }
 
-QScrollBar::handle:vertical {
-    background: #888; /* 滑块的颜色 */
-    min-height: 20px;
-}
+        QScrollBar::handle:vertical {
+            background: #888; /* 滑块的颜色 */
+            min-height: 20px;
+        }
 
-QScrollBar::add-line:vertical {
-    border: 2px solid grey;
-    background: #32CC99;
-    height: 20px;
-    subcontrol-position: bottom;
-    subcontrol-origin: margin;
-}
+        QScrollBar::add-line:vertical {
+            border: 2px solid grey;
+            background: #32CC99;
+            height: 20px;
+            subcontrol-position: bottom;
+            subcontrol-origin: margin;
+        }
 
-QScrollBar::sub-line:vertical {
-    border: 2px solid grey;
-    background: #32CC99;
-    height: 20px;
-    subcontrol-position: top;
-    subcontrol-origin: margin;
-}
+        QScrollBar::sub-line:vertical {
+            border: 2px solid grey;
+            background: #32CC99;
+            height: 20px;
+            subcontrol-position: top;
+            subcontrol-origin: margin;
+        }
 
-QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
-    border: 2px solid grey;
-    width: 3px;
-    height: 3px;
-    background: white;
-}
+        QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+            border: 2px solid grey;
+            width: 3px;
+            height: 3px;
+            background: white;
+        }
 
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background: none;
-}
-)");
+        QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+            background: none;
+        }
+    )");
 
-    connect(ui->ImagelistWidget, &QListWidget::itemDoubleClicked, this, &MainWidget::enlargeImage);
-    connect(ui->ImagelistWidget, &QListWidget::itemClicked, this, &MainWidget::previewImage);
+    connect(imageGroup, &ImageGroup::sendImage, this, &MainWidget::addIconToList, Qt::QueuedConnection);  //添加图标到列表
+    connect(ui->ImagelistWidget, &QListWidget::itemDoubleClicked, this, &MainWidget::enlargeImage);  //双击查看原图
+    connect(ui->ImagelistWidget, &QListWidget::itemClicked, this, &MainWidget::previewImage);  //单击预览图片
+    imageGroup->creatPreviewPixmap();
 }
 
 void MainWidget::init()
 {
     ui->setupUi(this);
     this->setWindowIcon(QIcon(":/resource/icon.png"));
+    this->setWindowTitle("Wallpaper");
     // 设置 QTextBrowser 的默认字体
     QFont font("Microsoft YaHei", 10);  // 字体名和字体大小
     ui->ImageSizeInfo->setFont(font);
@@ -106,6 +84,7 @@ void MainWidget::init()
     ui->ImagelistWidget->setResizeMode(QListView::Adjust);//大小自适应
     ui->ImagelistWidget->setMovement(QListView::Static);//设置列表每一项不可移动
     //设置桌面图片填充模式
+    ui->wallpaperMode->hide();//bug尚未解决，先隐藏
     ui->wallpaperMode->setFont(font);
     ui->wallpaperMode->addItem("填充", QVariant("fill"));
     ui->wallpaperMode->addItem("适应", QVariant("fit"));
@@ -116,6 +95,7 @@ void MainWidget::init()
     connect(ui->wallpaperMode, SIGNAL(currentIndexChanged(int)), this, SLOT(updateImageMode(int)));
 }
 
+//向图片列表添加缩略图图标
 void MainWidget::addIconToList(QString filePath) {    
     QFileInfo fileInfo(filePath);
     QString baseName = fileInfo.baseName();
@@ -135,7 +115,7 @@ void MainWidget::addIconToList(QString filePath) {
     ui->ImagelistWidget->setItemWidget(newitem, itemWidget);
 }
 
-
+//更新图片显示模式
 void MainWidget::updateImageMode(int imageMode) {
     imageMode_ = imageMode;
     desktopWidget->SetimageMode(imageMode);
@@ -144,11 +124,11 @@ void MainWidget::updateImageMode(int imageMode) {
 
 //查看图片
 void MainWidget::enlargeImage(QListWidgetItem* item) {
-    QString filepath = item->data(Qt::UserRole).toString();
-    //desktopWidget->SetPixmap(filepath);
+    QString filepath = item->data(Qt::UserRole + 1).toString();
     ImageView* showImageWidget = new ImageView();
+    showImageWidget->setAttribute(Qt::WA_DeleteOnClose); //关闭窗口后释放内存
     showImageWidget->SetImage(filepath);
-    showImageWidget->show();  
+    showImageWidget->show();
 }
 
 //预览图片
@@ -181,8 +161,8 @@ MainWidget::~MainWidget()
 	delete ui;
 }
 
+//从本地文件夹添加图片
 void MainWidget::on_ImageListBnt_clicked() {
-	//ui->stackedWidget->setCurrentIndex(0);
     QStringList file_paths = QFileDialog::getOpenFileNames(this, tr("Image Path"), "Data\\", tr("Image Files(*.png *.jpg *.jpeg *.mp4);"));
     //添加图片
     imageGroup->addImage(file_paths);
@@ -191,12 +171,13 @@ void MainWidget::on_ImageListBnt_clicked() {
 void MainWidget::on_SettingBnt_clicked() {
     if (!rolewidget) {
         rolewidget = new RoleWidget();
+        rolewidget->setAttribute(Qt::WA_DeleteOnClose);
         rolewidget->show();
-        qDebug() << "fuck you";
     }
     else {
         rolewidget->close();
-        rolewidget = nullptr;
+        //delete rolewidget;  // 释放内存
+        rolewidget = nullptr; //避免野指针
     }     
 }
 
@@ -212,7 +193,7 @@ void MainWidget::closeEvent(QCloseEvent* event)
         desktopWidget->close();
     }
     if (rolewidget) {
-        desktopWidget->close();
+        rolewidget->close();
     }
     //MainWidget::closeEvent(event);  // 调用基类的关闭事件处理
 }

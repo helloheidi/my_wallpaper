@@ -6,6 +6,7 @@
 #include <QVideoWidget>
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
+#include <qstackedwidget.h>
 class DesktopWidget  : public QWidget
 {
 	Q_OBJECT
@@ -35,6 +36,7 @@ private:
 	QMediaPlayer* videoPlayer;
 	QVideoWidget* videoWidget;
 	QWidget* imageWidget;
+	QStackedWidget* stackedWidget;
 	
 	void showImage(QString filePath);
 	void showVideo(QString filePath);

@@ -32,13 +32,14 @@ private:
     bool move_start_;
     bool is_moving_;
     QPoint mouse_point_;
+    void updateDisplayImage();
 
 protected:
-	bool eventFilter(QObject* obj, QEvent* e);
+    //void closeEvent(QCloseEvent* event)override;
     void paintEvent(QPaintEvent* event)override;
     void wheelEvent(QWheelEvent* event)override;
     void mousePressEvent(QMouseEvent* event)override;
     void mouseReleaseEvent(QMouseEvent* event)override;
     void mouseMoveEvent(QMouseEvent* event)override;
-    void resizeEvent(QResizeEvent* event)override;
+    //void resizeEvent(QResizeEvent* event)override;
 };
