@@ -12,15 +12,11 @@
 ImageGroup::ImageGroup(QObject* parent)
     : QObject(parent)
 {
-    /*QString path1 = QString(QDir::currentPath() + "/resource/mywallpaper/");
-    QDirIterator it(path1, QStringList() << "*.png" << "*.jpg" << "*.jpeg", QDir::Files, QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        new_images_ << it.next();
-    }*/
-    //all_images_.append(new_images_);
     QFile configFile("resource/config.txt");
     if (!configFile.open(QIODevice::ReadWrite | QIODevice::Text)) {
         qDebug() << "Unable to open config file for reading.";
+        qDebug() << "Current Path:" << QDir::currentPath();
+        qDebug() << "Current Path:" << QCoreApplication::applicationDirPath();
         return;
     }
     QTextStream in(&configFile);
@@ -51,10 +47,10 @@ ImageGroup::~ImageGroup()
 //向图片数组中添加图片
 bool ImageGroup::addImage(const QStringList& img_paths)
 {
-    if (img_paths.empty()) return false;
     //清空新增图片数组
     new_images_.clear();
     new_images_ = img_paths;
+    if (new_images_.empty()) return false;
     //从新添加的图片列表中提出源列表中已经存在的图片路径
     QSet<QString> pathsSet(all_images_.begin(), all_images_.end());
     QStringList filteredNewPaths;
@@ -73,6 +69,7 @@ bool ImageGroup::addImage(const QStringList& img_paths)
     return true;
 }
 
+//将添加的图片拷贝到本地文件夹并创建缩略图
 void ImageGroup::processImages(QStringList& fileNames) {
     QFile configFile("resource/config.txt");
     if (!configFile.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
@@ -106,8 +103,8 @@ void ImageGroup::processImages(QStringList& fileNames) {
     configFile.close();
 }
 
-void ImageGroup::createThumbnail(const QString& filePath, const QString& baseName, const QString& dirPath) {
-    //线程池创建缩略图
+//线程池创建缩略图
+void ImageGroup::createThumbnail(const QString& filePath, const QString& baseName, const QString& dirPath) {    
     QtConcurrent::run([=]() {
         QImage image(filePath);
         if (image.isNull()) {
@@ -137,30 +134,13 @@ void ImageGroup::createThumbnail(const QString& filePath, const QString& baseNam
         });
 }
 
-//生成缩略图并添加item
+//添加item
 void ImageGroup::creatPreviewPixmap()
 {
     for(QString & filePath : new_images_) {
         qDebug() << "fucking send" << filePath;
         emit sendImage(filePath);
     }
-    //emit finished();
-    // for (int i = 0; i < new_images_.size(); ++i) {
-    //    QString imagePath = new_images_.at(i);
-    //    // 异步加载图片
-    //    QtConcurrent::run([=]() {
-    //        qDebug() << new_images_.at(i);
-    //        //QIcon icon(createRoundedPixmap(QPixmap(imagePath).scaled(125, 125, Qt::KeepAspectRatio, Qt::SmoothTransformation), 5));
-    //        QListWidgetItem* newitem = new QListWidgetItem;
-    //        ListWidgetItem* itemWidget = new ListWidgetItem(imagePath);
-    //        //newitem->setSizeHint(QSize(125, 125));
-    //        newitem->setData(Qt::UserRole, QVariant(imagePath));
-    //        newitem->setText(""); // 如果不需要显示文本
-    //        newitem->setTextAlignment(Qt::AlignHCenter);
-    //        //ui->ImagelistWidget->addItem(newitem);
-    //        emit sendImage(newitem, itemWidget);
-    //        });
-    //}
 }
 
 //为缩略图添加圆角

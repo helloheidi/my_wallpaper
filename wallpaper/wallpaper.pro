@@ -1,4 +1,4 @@
-QT += core gui widgets
+QT += core gui widgets multimedia multimediawidgets
 
 LIBS += -lUser32
 
@@ -20,6 +20,7 @@ SOURCES += \
     src/ImageGroup.cpp \
     src/desktopwidget.cpp \
     src/imageview.cpp \
+    src/listwidgetitem.cpp \
     src/main.cpp \
     src/mainwidget.cpp \
     src/rolewidget.cpp
@@ -33,6 +34,7 @@ HEADERS += \
     include/ImageGroup.h \
     include/desktopwidget.h \
     include/imageview.h \
+    include/listwidgetitem.h \
     include/mainwidget.h \
     include/rolewidget.h
 

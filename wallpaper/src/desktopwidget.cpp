@@ -8,6 +8,7 @@
 #include <qdir.h>
 #include <qpainter.h>
 
+
 QSet<QString> DesktopWidget::imageFormats;
 QSet<QString> DesktopWidget::videoFormats;
 
@@ -19,7 +20,10 @@ DesktopWidget::DesktopWidget(QWidget* parent)
     videoFormats = { "mp4", "avi", "mov", "mkv", "flv", "wmv" };
     //setWindowFlags(Qt::FramelessWindowHint);
     //setAttribute(Qt::WA_TranslucentBackground);
+    this->setFixedSize(screenWidth, screenHeight);
+
     QHBoxLayout* layout = new QHBoxLayout(this);
+    
     layout->setMargin(0);
     layout->addWidget(bklabel);
     // 获取主屏幕
@@ -39,20 +43,11 @@ DesktopWidget::DesktopWidget(QWidget* parent)
     videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
     
     videoPlayer->setVideoOutput(videoWidget);
-    //connect(videoPlayer, &QMediaPlayer::mediaStatusChanged, this, &DesktopWidget::onMediaStatusChanged);
     layout->addWidget(videoWidget);
 }
 
 DesktopWidget::~DesktopWidget()
 {}
-
-
-//void DesktopWidget::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
-//    if (status == QMediaPlayer::LoadedMedia) {
-//        videoPlayer->play();
-//        this->showFullScreen();
-//    }
-//}
 
 void DesktopWidget::UpdateWallpaper() {
     if (filePath_.isEmpty()) {
@@ -81,10 +76,8 @@ void DesktopWidget::showVideo(QString filePath) {
     playlist->setCurrentIndex(0);
     playlist->addMedia(QUrl::fromLocalFile(filePath));
     videoPlayer->setPlaylist(playlist);  // 设置播放列表
-    //videoPlayer->setMedia(QUrl::fromLocalFile(filePath));
     connect(videoPlayer, &QMediaPlayer::mediaStatusChanged, this, [&](QMediaPlayer::MediaStatus status) {
-        //if (status == QMediaPlayer::BufferedMedia) {  // 确保媒体已缓冲
-        if (status == QMediaPlayer::LoadedMedia) {
+        if (status == QMediaPlayer::LoadedMedia) {  // 确保媒体已加载
             videoPlayer->play();
             bklabel->hide();
             this->showFullScreen();            
@@ -102,13 +95,11 @@ void DesktopWidget::showImage(QString filePath) {
     if (!success) {
         qDebug() << "image load faild.";
     }
-
-    switch (imageMode_) {
+    
+    switch (2) {//参数：imageMode_,其他几种显示比例与桌面分辨率不符的图片时会出现bug，所以暂时默认拉伸了
     case 0://填充
         {
-            QSize scaledSize = bkPixmap.size();
-            scaledSize.scale(screenWidth, screenHeight, Qt::KeepAspectRatioByExpanding);
-            bkPixmap = bkPixmap.scaled(scaledSize, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+            bkPixmap = bkPixmap.scaled(screenWidth, screenHeight, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
             qDebug() << "填充";
         }
         break;
@@ -142,9 +133,11 @@ void DesktopWidget::showImage(QString filePath) {
     bklabel->setPixmap(bkPixmap);
     bklabel->setAutoFillBackground(false); // 清除可能存在的背景色设置
 	this->showFullScreen();
+    //qDebug() << "Label geometry:" << bklabel->geometry();
+    //qDebug() << "Parent geometry:" << (bklabel->parentWidget() ? bklabel->parentWidget()->geometry() : QRect());
 }
 
-//获取背景窗体句柄"D:/Electronic_2/MyProject/wallpaper/wallpaper/resource/video/心海.mp4"
+//获取背景窗体句柄
 HWND DesktopWidget::GetBackground() {
     //背景窗体没有窗体名，但是知道它的类名是workerW，且有父窗体Program Maneger，所以只要
     //遍历所有workerW类型的窗体，逐一比较它的父窗体是不是Program Manager就可以找到背景窗体
@@ -186,9 +179,9 @@ HWND DesktopWidget::GetBackground() {
 void DesktopWidget::SetBackground(HWND child) {
     SetParent(child, GetBackground()); // 把视频窗口设置为Program Manager的儿子
 }
+
 void DesktopWidget::resizeEvent(QResizeEvent* event) {
     QWidget::resizeEvent(event);  // 调用基类实现
     // 更新 bklabel 的大小来匹配新的窗口尺寸
     bklabel->resize(this->size());
-    // 如果需要，重新设置内容的缩放或位置
 }

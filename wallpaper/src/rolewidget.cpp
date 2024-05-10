@@ -14,8 +14,9 @@ RoleWidget::RoleWidget(QWidget *parent)
 	, curframe(0)
 {
 	//去掉窗口边框和让背景透明
-	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+	setWindowFlags(Qt::FramelessWindowHint);
 	setAttribute(Qt::WA_TranslucentBackground);
+	this->setWindowIcon(QIcon(":/resource/icon.png"));
 
 	//使用定时器更新动画
 	QTimer* updateTimer = new QTimer(this);
@@ -31,12 +32,8 @@ RoleWidget::RoleWidget(QWidget *parent)
 	this->installEventFilter(this);
 
 	updateRoleAnimation();
-	rolelabel->resize(500, 500);
+	rolelabel->resize(350, 500);
 
-	//desktopWidget->show();
-
-
-	initBtn();
 }
 
 RoleWidget::~RoleWidget()

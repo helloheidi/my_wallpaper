@@ -20,7 +20,6 @@ private:
 	QString path_;
 	//所有图片数组
 	QStringList all_images_;
-	QStringList namefiles, files;
 	//新增图片数组
 	QStringList new_images_;
 	
