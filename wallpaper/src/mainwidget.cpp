@@ -18,6 +18,8 @@ MainWidget::MainWidget(QWidget *parent)
     init();
     imageGroup = new ImageGroup();
 
+    
+
     //样式表设计美化界面
     ui->ImagelistWidget->setStyleSheet(R"(
         QListWidget::Item:hover{background:lightblue;}
