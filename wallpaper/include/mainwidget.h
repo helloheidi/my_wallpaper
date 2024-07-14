@@ -43,4 +43,8 @@ private slots:
 	void on_ImageListBnt_clicked();
 	void on_SettingBnt_clicked();
 	void on_SetDesktop_clicked();
+	void showContextMenu(const QPoint& pos);
+	void deleteSelectedItems();
+	void editSelectedItems();
+	//右键菜单
 };

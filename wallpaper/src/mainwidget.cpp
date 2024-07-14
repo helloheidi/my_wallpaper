@@ -8,6 +8,9 @@
 #include <QVBoxLayout>
 #include <qpainter.h>
 
+#include <qmenu.h>
+#include <qaction.h>
+
 
 MainWidget::MainWidget(QWidget *parent)
 	: QWidget(parent)
@@ -67,6 +70,7 @@ MainWidget::MainWidget(QWidget *parent)
     connect(imageGroup, &ImageGroup::sendImage, this, &MainWidget::addIconToList, Qt::QueuedConnection);  //添加图标到列表
     connect(ui->ImagelistWidget, &QListWidget::itemDoubleClicked, this, &MainWidget::enlargeImage);  //双击查看原图
     connect(ui->ImagelistWidget, &QListWidget::itemClicked, this, &MainWidget::previewImage);  //单击预览图片
+    connect(ui->ImagelistWidget, &QListWidget::customContextMenuRequested, this, &MainWidget::showContextMenu);//右键选中图片
     imageGroup->creatPreviewPixmap();
 }
 
@@ -85,6 +89,9 @@ void MainWidget::init()
     ui->ImagelistWidget->setFlow(QListView::LeftToRight);//从左到右
     ui->ImagelistWidget->setResizeMode(QListView::Adjust);//大小自适应
     ui->ImagelistWidget->setMovement(QListView::Static);//设置列表每一项不可移动
+    ui->ImagelistWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);//设置允许多选
+    ui->ImagelistWidget->setContextMenuPolicy(Qt::CustomContextMenu);//设置允许菜单
+
     //设置桌面图片填充模式
     ui->wallpaperMode->hide();//bug尚未解决，先隐藏
     ui->wallpaperMode->setFont(font);
@@ -108,7 +115,7 @@ void MainWidget::addIconToList(QString filePath) {
     }
     qDebug() << "basename:" << baseName << "dirpath:" << dirPath << "thumbnail" << thumbnailPath;
     QListWidgetItem* newitem = new QListWidgetItem();
-    ListWidgetItem* itemWidget = new ListWidgetItem(thumbnailPath);
+    ListWidgetItem* itemWidget = new ListWidgetItem(thumbnailPath); 
     newitem->setSizeHint(itemWidget->sizeHint());
     newitem->setData(Qt::UserRole, QVariant(thumbnailPath));
     newitem->setData(Qt::UserRole + 1, QVariant(filePath));
@@ -116,6 +123,40 @@ void MainWidget::addIconToList(QString filePath) {
     ui->ImagelistWidget->addItem(newitem);
     ui->ImagelistWidget->setItemWidget(newitem, itemWidget);
 }
+
+void MainWidget::showContextMenu(const QPoint& pos)
+{
+    QMenu contextMenu(tr("Context menu"), this);
+
+    QAction actionDelete("Delete", this);
+    connect(&actionDelete, &QAction::triggered, this, &MainWidget::deleteSelectedItems);
+    contextMenu.addAction(&actionDelete);
+
+    QAction actionEdit("Edit", this);
+    connect(&actionEdit, &QAction::triggered, this, &MainWidget::editSelectedItems);
+    contextMenu.addAction(&actionEdit);
+
+    //contextMenu.exec(mapToGlobal(pos));
+    // 显示菜单
+    contextMenu.exec(ui->ImagelistWidget->viewport()->mapToGlobal(pos));
+}
+
+void MainWidget::deleteSelectedItems()
+{
+    auto selectedItems = ui->ImagelistWidget->selectedItems();
+    for (auto* item : selectedItems) {
+        delete item; // 删除选中的项
+    }
+}
+
+void MainWidget::editSelectedItems()
+{
+    auto selectedItems = ui->ImagelistWidget->selectedItems();
+    for (auto* item : selectedItems) {
+        // 对每个选中的项进行编辑
+    }
+}
+
 
 //更新图片显示模式
 void MainWidget::updateImageMode(int imageMode) {
@@ -125,19 +166,31 @@ void MainWidget::updateImageMode(int imageMode) {
 }
 
 //查看图片
+//void MainWidget::enlargeImage(QListWidgetItem* item) {
+//    QString filepath = item->data(Qt::UserRole + 1).toString();
+//    ImageView* showImageWidget = new ImageView();
+//    showImageWidget->setAttribute(Qt::WA_DeleteOnClose); //关闭窗口后释放内存
+//    showImageWidget->SetImage(filepath);
+//    showImageWidget->show();
+//}
+
 void MainWidget::enlargeImage(QListWidgetItem* item) {
-    QString filepath = item->data(Qt::UserRole + 1).toString();
-    ImageView* showImageWidget = new ImageView();
-    showImageWidget->setAttribute(Qt::WA_DeleteOnClose); //关闭窗口后释放内存
-    showImageWidget->SetImage(filepath);
-    showImageWidget->show();
+    if (!item) return;
+    delete item;
 }
 
 //预览图片
 void MainWidget::previewImage(QListWidgetItem* item) {
     selectImage_pre = item->data(Qt::UserRole).toString();
     selectImage_ = item->data(Qt::UserRole + 1).toString();
-    //QPixmap Image = QPixmap(selectImage_);
+
+    // 清理之前的动画或图片
+    if (ui->ImagePreview->movie()) {
+        QMovie* currentMovie = ui->ImagePreview->movie();
+        ui->ImagePreview->setMovie(nullptr);  // 将 QLabel 的 movie 设为 nullptr
+        currentMovie->stop();  // 停止当前的 QMovie
+        delete currentMovie;   // 删除当前的 QMovie
+    }
 
     QMovie* movie = new QMovie(selectImage_pre);
     ui->ImagePreview->setScaledContents(true);
@@ -146,17 +199,18 @@ void MainWidget::previewImage(QListWidgetItem* item) {
         movie->start();
     }
     else {
-        // 如果不是有效的动图，就当作普通图像处理
+        delete movie; // 如果 QMovie 无效，确保删除它以避免内存泄漏
         QPixmap pixmap(selectImage_pre);
-        ui->ImagePreview->setPixmap(pixmap);
+        if (!pixmap.isNull()) {
+            ui->ImagePreview->setPixmap(pixmap);
+        }
+        else {
+            qDebug() << "Unable to load image from:" << selectImage_pre;// 处理图像加载失败的情况，如显示默认图片或错误信息
+        }
     }
-    //QString Imagesize = QString("%1 × %2").arg(Image.width()).arg(Image.height());
-    //Image = Image.scaled(ui->ImagePreview->width(), ui->ImagePreview->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-
-    //ui->ImagePreview->setPixmap(Image);
-    //ui->ImageSizeInfo->setPlainText(Imagesize);
-    ui->ImageNameInfo->setPlainText(selectImage_pre.section('/', -1));
+    ui->ImageNameInfo->setPlainText(QFileInfo(selectImage_pre).fileName());
 }
+
 
 MainWidget::~MainWidget()
 {
